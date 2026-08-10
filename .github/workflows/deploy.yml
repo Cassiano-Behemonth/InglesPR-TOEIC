@@ -1,0 +1,50 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Roda a cada hora (no minuto 0)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Permite rodar manualmente pela aba Actions do GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas gspread google-auth
+
+      - name: Create Google Credentials File
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > google_credentials.json
+
+      - name: Run data consolidation
+        run: |
+          python consolidar_dados.py
+
+      - name: Prepare site directory
+        run: |
+          mkdir dist
+          cp mapa_toeic_pr.html dist/index.html
+          cp mapa_toeic_pr.html dist/mapa_toeic_pr.html
+          cp comparativo_toeic.html dist/comparativo_toeic.html
+
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=dist --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

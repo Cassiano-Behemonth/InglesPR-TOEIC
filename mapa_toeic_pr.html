@@ -30,10 +30,50 @@
       color: var(--ink);
       font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
+    .navbar {
+      height: 56px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 0 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--accent-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .navbar-menu {
+      display: flex;
+      gap: 12px;
+    }
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 550;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover {
+      color: var(--ink);
+      background: var(--panel-soft);
+    }
+    .nav-link.active {
+      color: var(--panel);
+      background: var(--accent);
+    }
     .app {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 420px;
-      height: 100vh;
+      height: calc(100vh - 56px);
       overflow: hidden;
     }
     .map-area {
@@ -123,7 +163,7 @@
       flex-direction: column;
       border-left: 1px solid var(--line);
       background: var(--panel);
-      height: 100vh;
+      height: 100%;
       min-width: 0;
       overflow: hidden;
     }
@@ -245,6 +285,15 @@
   </style>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span>TOEIC Paraná</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="mapa_toeic_pr.html" class="nav-link active">Mapa Geral</a>
+      <a href="comparativo_toeic.html" class="nav-link">Comparativo Inscrições</a>
+    </div>
+  </nav>
   <main class="app">
     <section class="map-area">
       <div class="topbar">
