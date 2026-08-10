@@ -1,0 +1,8 @@
+[build]
+  # Comando de build que instala dependências, roda o script python e prepara a pasta dist
+  command = "pip install pandas gspread google-auth && python consolidar_dados.py && mkdir -p dist && cp mapa_toeic_pr.html dist/index.html && cp mapa_toeic_pr.html dist/mapa_toeic_pr.html && cp comparativo_toeic.html dist/comparativo_toeic.html"
+  # Pasta que o Netlify deve publicar/servir na web
+  publish = "dist"
+
+[build.environment]
+  PYTHON_VERSION = "3.10"
