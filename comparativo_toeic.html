@@ -299,10 +299,10 @@
   <script>
     const statsComparativo = {
   "totalConfirmadas": 1573,
-  "totalCadastradas": 108,
-  "ambas": 91,
-  "apenasCadastro": 17,
-  "apenasConfirmacao": 1482
+  "totalCadastradas": 112,
+  "ambas": 93,
+  "apenasCadastro": 19,
+  "apenasConfirmacao": 1480
 };
     const listaEscolas = [
   {
@@ -1486,7 +1486,7 @@
     "nre": "AREA METROP.SUL",
     "cidade_planilha": "FAZENDA RIO GRANDE",
     "alunos": 6,
-    "status": "confirmed_only"
+    "status": "both"
   },
   {
     "escola": "CAETANO M DA ROCHA, C E DO C DR-EF M",
@@ -2347,7 +2347,7 @@
     "nre": "CAMPO MOURAO",
     "cidade_planilha": "BARBOSA FERRAZ",
     "alunos": 8,
-    "status": "confirmed_only"
+    "status": "both"
   },
   {
     "escola": "CAMPINA DA LAGOA, C E-EF M ETI",
@@ -11434,6 +11434,20 @@
     "cidade_planilha": "",
     "alunos": 0,
     "status": "registered_only"
+  },
+  {
+    "escola": "PERCY TEIXEIRA FARIA, CEC PROF-EF ETI EM (41357230)",
+    "nre": "\u00c1rea Metropolitana Norte",
+    "cidade_planilha": "",
+    "alunos": 0,
+    "status": "registered_only"
+  },
+  {
+    "escola": "ZACARIAS C.DE CRISTO, C E-EF M (41145836)",
+    "nre": "\u00c1rea Metropolitana Norte",
+    "cidade_planilha": "",
+    "alunos": 0,
+    "status": "registered_only"
   }
 ];
 
@@ -11532,6 +11546,11 @@
         if (response.ok) {
           btn.querySelector('span').textContent = 'Atualizando...';
           alert("Atualização iniciada com sucesso! Os novos dados do formulário serão exibidos nesta página em cerca de 1 a 2 minutos. Recarregue a página em seguida.");
+          setTimeout(() => {
+            btn.disabled = false;
+            icon.classList.remove('spinning');
+            btn.querySelector('span').textContent = 'Atualizar Dados';
+          }, 30000); // Destrava após 30 segundos
         } else {
           throw new Error("Erro na requisição");
         }

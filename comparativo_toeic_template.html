@@ -395,6 +395,11 @@
         if (response.ok) {
           btn.querySelector('span').textContent = 'Atualizando...';
           alert("Atualização iniciada com sucesso! Os novos dados do formulário serão exibidos nesta página em cerca de 1 a 2 minutos. Recarregue a página em seguida.");
+          setTimeout(() => {
+            btn.disabled = false;
+            icon.classList.remove('spinning');
+            btn.querySelector('span').textContent = 'Atualizar Dados';
+          }, 30000); // Destrava após 30 segundos
         } else {
           throw new Error("Erro na requisição");
         }
