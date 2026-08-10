@@ -72,8 +72,21 @@ Suba a pasta do projeto para o seu repositório privado no GitHub. Depois, confi
 | `NETLIFY_AUTH_TOKEN` | Seu Token de Acesso Pessoal do Netlify (Gerado em *Netlify > User Settings > Applications > Personal access tokens*). |
 | `NETLIFY_SITE_ID` | O ID do seu site no Netlify (Encontrado em *Netlify > Site configuration > Site details > Site ID*). |
 
+### Passo 3.2: Configurar o Botão "Atualizar Dados"
+Para habilitar o funcionamento do botão "Atualizar Dados" na página de comparação sem expor suas credenciais:
+
+1. No painel do seu site no **Netlify**, vá em **Site configuration > Build & deploy > Continuous deployment**.
+2. Desça até a seção **Build hooks** e clique em **Add build hook**.
+3. Dê um nome (ex: *Botão de Atualizar*) e salve. Ele gerará uma URL. **Copie essa URL**.
+4. Agora, vá em **Site configuration > Environment variables** (variáveis de ambiente) no Netlify.
+5. Clique em **Add a variable** e adicione a seguinte variável:
+   * Key (Chave): `NETLIFY_BUILD_HOOK_URL`
+   * Value (Valor): Cole a URL do Build Hook que você acabou de copiar.
+6. Clique em **Save**.
+
 ---
 
 ## Como funciona a atualização?
 * **Deploy no Commit:** Toda vez que você fizer um `git push` para o GitHub, o site será reconstruído e publicado no Netlify.
-* **Atualização Periódica:** O GitHub Actions executará o script automaticamente a cada 1 hora, baixando os novos cadastros da planilha, gerando o novo comparativo e atualizando a sua página no Netlify sem que você precise fazer nada!
+* **Atualização Periódica:** O GitHub Actions executará o script automaticamente a cada 1 hora, baixando os novos cadastros da planilha, gerando o novo comparativo e atualizando a sua página no Netlify.
+* **Botão Atualizar Dados (Manual):** Clicando no botão na página de comparação, o Netlify iniciará uma reconstrução instantânea e o site será atualizado com os novos dados em cerca de 1 a 2 minutos.

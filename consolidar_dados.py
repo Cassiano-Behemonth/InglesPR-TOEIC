@@ -390,6 +390,10 @@ def processar_dados():
     # Injeta os dados nas variáveis do script
     html_content = html_content.replace('/*DATA_STATS_PLACEHOLDER*/', f'const statsComparativo = {json.dumps(stats_comparativo, indent=2)};')
     html_content = html_content.replace('/*DATA_LISTA_PLACEHOLDER*/', f'const listaEscolas = {json.dumps(escolas_comparadas, indent=2)};')
+    
+    # Injeta a URL de Build Hook do Netlify
+    build_hook_url = os.environ.get('NETLIFY_BUILD_HOOK_URL', '')
+    html_content = html_content.replace('/*NETLIFY_BUILD_HOOK_URL_PLACEHOLDER*/', build_hook_url)
 
     with open(OUTPUT_HTML, 'w', encoding='utf-8') as f:
         f.write(html_content)
@@ -472,6 +476,11 @@ def criar_template_padrao():
     }
     .header {
       margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
     }
     h1 {
       margin: 0;
@@ -481,6 +490,38 @@ def criar_template_padrao():
     .subtitle {
       color: var(--muted);
       margin-top: 6px;
+    }
+    .btn-refresh {
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      outline: none;
+    }
+    .btn-refresh:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-refresh:disabled {
+      border-color: var(--line);
+      color: var(--muted);
+      background: #f1f3f0;
+      cursor: not-allowed;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spinning {
+      animation: spin 1.2s linear infinite;
     }
     .grid-stats {
       display: grid;
@@ -594,8 +635,14 @@ def criar_template_padrao():
 
   <main class="container">
     <header class="header">
-      <h1>Comparativo de Adesão</h1>
-      <div class="subtitle">Análise de conciliação entre escolas que responderam ao formulário e a listagem homologada (oficial).</div>
+      <div>
+        <h1>Comparativo de Adesão</h1>
+        <div class="subtitle">Análise de conciliação entre escolas que responderam ao formulário e a listagem homologada (oficial).</div>
+      </div>
+      <button id="btnAtualizar" class="btn-refresh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        <span>Atualizar Dados</span>
+      </button>
     </header>
 
     <section class="grid-stats">
@@ -732,6 +779,38 @@ def criar_template_padrao():
 
     // Renderiza inicial
     renderTable();
+
+    // Lógica do botão Atualizar Dados via Netlify Build Hook
+    const btn = document.getElementById('btnAtualizar');
+    const buildHookUrl = "/*NETLIFY_BUILD_HOOK_URL_PLACEHOLDER*/";
+    
+    btn.addEventListener('click', async () => {
+      if (!buildHookUrl || buildHookUrl.startsWith('/*') || !buildHookUrl.trim()) {
+        alert("O botão de atualização instantânea ainda não foi configurado. Adicione a variável de ambiente NETLIFY_BUILD_HOOK_URL no Netlify e recompile o site.");
+        return;
+      }
+      
+      btn.disabled = true;
+      const icon = btn.querySelector('svg');
+      icon.classList.add('spinning');
+      btn.querySelector('span').textContent = 'Solicitando atualização...';
+      
+      try {
+        const response = await fetch(buildHookUrl, { method: 'POST' });
+        if (response.ok) {
+          btn.querySelector('span').textContent = 'Atualizando...';
+          alert("Atualização iniciada com sucesso! Os novos dados do formulário serão exibidos nesta página em cerca de 1 a 2 minutos. Recarregue a página em seguida.");
+        } else {
+          throw new Error("Erro na requisição");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Ocorreu um erro ao solicitar a atualização. Tente novamente mais tarde.");
+        btn.disabled = false;
+        icon.classList.remove('spinning');
+        btn.querySelector('span').textContent = 'Atualizar Dados';
+      }
+    });
   </script>
 </body>
 </html>
