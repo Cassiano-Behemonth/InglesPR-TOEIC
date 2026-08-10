@@ -24,6 +24,8 @@ except ImportError:
 SPREADSHEET_ID = "13yzhG3Ae3L0-wFh-UQ7QF_3Jfe__Prh7bGhWJDF3lZ8"
 WORKSHEET_GID = "304698461"
 CREDENTIALS_FILE = "credentials.json"
+# Nomes alternativos aceitos (o workflow do GitHub Actions grava google_credentials.json)
+CREDENTIALS_FILE_ALTS = ["credentials.json", "google_credentials.json"]
 LOCAL_CADASTRO_CSV = "cadastro_escolas.csv"
 CONFIRMADOS_CSV = "Resultado_TOEIC_Ofício - Página1.csv"
 OUTPUT_HTML = "comparativo_toeic.html"
@@ -117,16 +119,41 @@ def get_city_from_row(row):
                 return val_str
     return None
 
+def obter_credenciais(scopes):
+    """Resolve as credenciais da conta de serviço a partir do ambiente ou de um arquivo local.
+
+    Ordem de preferência:
+    1. Variável de ambiente GOOGLE_SERVICE_ACCOUNT_KEY com o JSON da chave (usada em CI/Netlify,
+       onde o arquivo de credenciais não existe porque está no .gitignore).
+    2. Arquivo local, aceitando os nomes de CREDENTIALS_FILE_ALTS.
+    """
+    key_json = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY', '').strip()
+    if key_json:
+        print("Usando credenciais da variável de ambiente GOOGLE_SERVICE_ACCOUNT_KEY...")
+        return Credentials.from_service_account_info(json.loads(key_json), scopes=scopes)
+
+    for caminho in CREDENTIALS_FILE_ALTS:
+        if os.path.exists(caminho):
+            print(f"Usando credenciais do arquivo {caminho}...")
+            return Credentials.from_service_account_file(caminho, scopes=scopes)
+
+    return None
+
 def carregar_cadastros():
     """Tenta carregar os cadastros do Google Sheets ou de um CSV local."""
     df_cadastros = None
 
     # Método 1: Tenta Google Sheets via Conta de Serviço
-    if gspread and os.path.exists(CREDENTIALS_FILE):
-        print(f"Tentando baixar dados do Google Sheets usando {CREDENTIALS_FILE}...")
+    if gspread:
+        print("Tentando baixar dados do Google Sheets...")
         try:
             scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-            creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=scopes)
+            creds = obter_credenciais(scopes)
+            if creds is None:
+                raise RuntimeError(
+                    "Nenhuma credencial encontrada (defina GOOGLE_SERVICE_ACCOUNT_KEY ou "
+                    f"crie um destes arquivos: {', '.join(CREDENTIALS_FILE_ALTS)})"
+                )
             client = gspread.authorize(creds)
             
             sh = client.open_by_key(SPREADSHEET_ID)

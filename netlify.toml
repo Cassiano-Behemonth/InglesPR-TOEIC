@@ -6,3 +6,7 @@
 
 [build.environment]
   PYTHON_VERSION = "3.10"
+  # A URL do Build Hook é injetada de propósito no HTML publicado (o botão "Atualizar
+  # Dados" faz o fetch pelo navegador). Sem esta exceção, o secrets scanning do Netlify
+  # encontra o valor na pasta dist e aborta o build.
+  SECRETS_SCAN_OMIT_KEYS = "NETLIFY_BUILD_HOOK_URL"

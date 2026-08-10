@@ -26,14 +26,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas gspread google-auth
 
-      - name: Create Google Credentials File
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > google_credentials.json
-
       - name: Run data consolidation
         run: |
           python consolidar_dados.py
         env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           NETLIFY_BUILD_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK_URL }}
 
       - name: Prepare site directory
