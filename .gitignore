@@ -1,0 +1,16 @@
+# Credenciais e Segredos do Google
+*credentials*.json
+*key*.json
+.env
+secret*.json
+
+# Temporários do Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
