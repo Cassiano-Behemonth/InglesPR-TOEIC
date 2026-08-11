@@ -939,6 +939,19 @@ def criar_template_padrao():
     </section>
   </main>
 
+  <!-- Modal de Detalhes da Equipe -->
+  <div id="infoModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalSchoolName">Nome da Escola</h3>
+        <button onclick="closeModal()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Conteúdo dinâmico via JS -->
+      </div>
+    </div>
+  </div>
+
   <script>
     /*DATA_STATS_PLACEHOLDER*/
     /*DATA_LISTA_PLACEHOLDER*/
@@ -1136,19 +1149,6 @@ def criar_template_padrao():
       }
     });
   </script>
-
-  <!-- Modal de Detalhes da Equipe -->
-  <div id="infoModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="modalSchoolName">Nome da Escola</h3>
-        <button onclick="closeModal()" class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Conteúdo dinâmico via JS -->
-      </div>
-    </div>
-  </div>
 </body>
 </html>
 """
