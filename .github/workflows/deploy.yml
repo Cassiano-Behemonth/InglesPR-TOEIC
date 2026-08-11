@@ -31,7 +31,6 @@ jobs:
           python consolidar_dados.py
         env:
           GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-          NETLIFY_BUILD_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK_URL }}
 
       - name: Prepare site directory
         run: |
@@ -41,9 +40,9 @@ jobs:
           cp comparativo_toeic.html dist/comparativo_toeic.html
 
       - name: Deploy to Netlify
-        uses: netlify/actions/cli@master
-        with:
-          args: deploy --dir=dist --prod
+        run: |
+          npm install -g netlify-cli
+          netlify deploy --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

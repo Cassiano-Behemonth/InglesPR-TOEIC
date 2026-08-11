@@ -510,10 +510,7 @@ def processar_dados():
     # Injeta os dados nas variáveis do script
     html_content = html_content.replace('/*DATA_STATS_PLACEHOLDER*/', f'const statsComparativo = {json.dumps(stats_comparativo, indent=2)};')
     html_content = html_content.replace('/*DATA_LISTA_PLACEHOLDER*/', f'const listaEscolas = {json.dumps(escolas_comparadas, indent=2)};')
-    
-    # Injeta a URL de Build Hook do Netlify
-    build_hook_url = os.environ.get('NETLIFY_BUILD_HOOK_URL', '')
-    html_content = html_content.replace('/*NETLIFY_BUILD_HOOK_URL_PLACEHOLDER*/', build_hook_url)
+
 
     with open(OUTPUT_HTML, 'w', encoding='utf-8') as f:
         f.write(html_content)
