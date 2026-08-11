@@ -86,6 +86,58 @@ def nre_matches(nre1, nre2):
 def clean_column_name(col):
     return normalize_name(col).lower()
 
+def extract_contacts(item):
+    rt = ""
+    suporte = ""
+    aplicadores = []
+    
+    # RT
+    rt_val = item.get('Nome completo do/a responsável pelo teste (RT)', '')
+    if rt_val and str(rt_val).lower().strip() != 'nan':
+        rt = str(rt_val).strip()
+        
+    # Suporte
+    sup_val = item.get('Nome completo do/a  responsável de suporte técnico e infraestrutura', '')
+    if not sup_val:
+        # fallback para diferentes espaçamentos
+        for k, v in item.items():
+            k_clean = re.sub(r'\s+', ' ', k).strip().lower()
+            if 'responsavel de suporte tecnico' in k_clean or 'responsavel de suporte tecnico e infraestrutura' in k_clean:
+                sup_val = v
+                break
+    if sup_val and str(sup_val).lower().strip() != 'nan':
+        suporte = str(sup_val).strip()
+        
+    # Aplicadores
+    # Primeiro, verifica se o RT também é aplicador:
+    rt_is_aplicador = item.get('Este RT também exercerá a função de aplicador?', '')
+    if rt_is_aplicador and str(rt_is_aplicador).strip().lower() in ['sim', 's', 'yes']:
+        if rt:
+            aplicadores.append(rt)
+            
+    # Depois, pega os outros aplicadores das colunas específicas
+    for k, v in item.items():
+        k_clean = re.sub(r'\s+', ' ', k).strip().lower()
+        if k_clean.startswith('nome completo do/a aplicador/a') or k_clean.startswith('nome completo do/a aplicador/a_'):
+            if v and str(v).lower().strip() != 'nan':
+                v_str = str(v).strip()
+                if v_str and v_str not in aplicadores:
+                    aplicadores.append(v_str)
+                    
+    # Extra aplicadores
+    extra_ap = item.get('Caso você tenha mais algum/a aplicador/a a ser indicado, indique no campo abaixo nome completo, cargo, email institucional e CPF.', '')
+    if extra_ap and str(extra_ap).lower().strip() != 'nan' and str(extra_ap).strip() != '':
+        extra_ap = str(extra_ap).strip()
+    else:
+        extra_ap = ""
+        
+    return {
+        'rt': rt,
+        'suporte': suporte,
+        'aplicadores': aplicadores,
+        'extra_aplicadores': extra_ap
+    }
+
 def detect_columns(df):
     school_col = None
     nre_col = None
@@ -345,6 +397,8 @@ def processar_dados():
         if not cidade:
             cidade = item.get(city_col_cad, 'Cidade indefinida') if city_col_cad else 'Cidade indefinida'
             
+        contacts = extract_contacts(item)
+        
         if norm_name:
             cadastros_normalizados.append({
                 'raw': item,
@@ -352,7 +406,8 @@ def processar_dados():
                 'nre': clean_nre_val,
                 'cidade': cidade,
                 'norm_name': norm_name,
-                'matched': False
+                'matched': False,
+                'contacts': contacts
             })
 
     # Totalizadores
@@ -361,6 +416,7 @@ def processar_dados():
     total_both = 0
 
     # Passada 1: Percorre as escolas confirmadas e cruza com as cadastradas
+    id_counter = 1
     for conf_row in list_conf:
         conf_school = conf_row.get('ESCOLA', '')
         conf_nre = conf_row.get('NRE', '')
@@ -399,31 +455,39 @@ def processar_dados():
             match_found['matched'] = True
             total_both += 1
             escolas_comparadas.append({
+                'id': id_counter,
                 'escola': conf_school,
                 'nre': conf_nre,
                 'cidade_planilha': cidade,
                 'alunos': conf_students,
-                'status': 'both'
+                'status': 'both',
+                'contacts': match_found['contacts']
             })
         else:
             escolas_comparadas.append({
+                'id': id_counter,
                 'escola': conf_school,
                 'nre': conf_nre,
                 'cidade_planilha': cidade,
                 'alunos': conf_students,
-                'status': 'confirmed_only'
+                'status': 'confirmed_only',
+                'contacts': None
             })
+        id_counter += 1
 
     # Passada 2: Adiciona as escolas que cadastraram mas NÃO foram confirmadas
     for cad_item in cadastros_normalizados:
         if not cad_item['matched']:
             escolas_comparadas.append({
+                'id': id_counter,
                 'escola': cad_item['raw_name'],
                 'nre': cad_item['nre'] if cad_item['nre'] else 'NRE indefinido',
                 'cidade_planilha': cad_item['cidade'],
                 'alunos': 0,
-                'status': 'registered_only'
+                'status': 'registered_only',
+                'contacts': cad_item['contacts']
             })
+            id_counter += 1
 
     # Estatísticas consolidadas
     total_registered_only = total_cadastradas - total_both
@@ -676,6 +740,124 @@ def criar_template_padrao():
       color: var(--muted);
       border: 1px solid var(--line);
     }
+    
+    /* Equipe / Modal / Info Button Styles */
+    .btn-info-team {
+      background: var(--panel-soft);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      padding: 2px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .btn-info-team:hover {
+      background: var(--accent);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-card {
+      background: var(--panel);
+      border-radius: 8px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: var(--shadow);
+      animation: slideUp 0.2s ease-out;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-soft);
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1;
+      padding: 0;
+    }
+    .modal-close:hover {
+      color: var(--ink);
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-section {
+      margin-bottom: 16px;
+    }
+    .modal-section:last-child {
+      margin-bottom: 0;
+    }
+    .modal-section-title {
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .modal-section-content {
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .modal-badge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .modal-badge-item {
+      background: var(--panel-soft);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      border-left: 3px solid var(--accent);
+      font-weight: 550;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -815,7 +997,14 @@ def criar_template_padrao():
       filtradas.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><b>${esc(item.escola)}</b></td>
+          <td>
+            <div style="display: inline-flex; align-items: center; gap: 4px; max-width: 100%;">
+              <span style="font-weight: 700;">${esc(item.escola)}</span>
+              ${item.contacts ? `
+                <button class="btn-info-team" onclick="showTeam(${item.id})" title="Ver Equipe de Aplicação">info</button>
+              ` : ''}
+            </div>
+          </td>
           <td>${esc(item.cidade_planilha)}</td>
           <td>${esc(item.nre)}</td>
           <td>${item.alunos > 0 ? fmt.format(item.alunos) : '-'}</td>
@@ -828,6 +1017,80 @@ def criar_template_padrao():
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted); padding: 24px;">Nenhuma escola corresponde aos filtros aplicados.</td></tr>`;
       }
     }
+
+    window.showTeam = function(id) {
+      const item = listaEscolas.find(e => e.id === id);
+      if (!item || !item.contacts) return;
+      
+      document.getElementById('modalSchoolName').textContent = item.escola;
+      
+      const c = item.contacts;
+      let html = '';
+      
+      // RT
+      html += `
+        <div class="modal-section">
+          <div class="modal-section-title">Responsável pelo Teste (RT)</div>
+          <div class="modal-section-content">
+            ${c.rt ? `<b>${esc(c.rt)}</b>` : '<i style="color: var(--muted)">Não informado</i>'}
+          </div>
+        </div>
+      `;
+      
+      // Aplicadores
+      let aplicadoresHtml = '';
+      if (c.aplicadores && c.aplicadores.length > 0) {
+        aplicadoresHtml = `<div class="modal-badge-list">`;
+        c.aplicadores.forEach(ap => {
+          aplicadoresHtml += `<div class="modal-badge-item">${esc(ap)}</div>`;
+        });
+        aplicadoresHtml += `</div>`;
+      } else {
+        aplicadoresHtml = '<i style="color: var(--muted)">Nenhum cadastrado</i>';
+      }
+      
+      html += `
+        <div class="modal-section">
+          <div class="modal-section-title">Aplicadores</div>
+          <div class="modal-section-content">${aplicadoresHtml}</div>
+        </div>
+      `;
+      
+      // Suporte Técnico
+      html += `
+        <div class="modal-section">
+          <div class="modal-section-title">Suporte Técnico & Infraestrutura</div>
+          <div class="modal-section-content">
+            ${c.suporte ? `<b>${esc(c.suporte)}</b>` : '<i style="color: var(--muted)">Não informado</i>'}
+          </div>
+        </div>
+      `;
+      
+      // Observações / Extra
+      if (c.extra_aplicadores) {
+        html += `
+          <div class="modal-section">
+            <div class="modal-section-title">Aplicadores Adicionais / Observações</div>
+            <div class="modal-section-content" style="white-space: pre-line; background: var(--panel-soft); padding: 8px; border-radius: 4px; font-size: 12px; max-height: 80px; overflow-y: auto; border: 1px solid var(--line);">
+              ${esc(c.extra_aplicadores)}
+            </div>
+          </div>
+        `;
+      }
+      
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('infoModal').style.display = 'flex';
+    };
+
+    window.closeModal = function() {
+      document.getElementById('infoModal').style.display = 'none';
+    };
+
+    document.getElementById('infoModal').addEventListener('click', (e) => {
+      if (e.target.id === 'infoModal') {
+        closeModal();
+      }
+    });
 
     document.getElementById('search').addEventListener('input', renderTable);
     document.getElementById('filterStatus').addEventListener('change', renderTable);
@@ -873,6 +1136,19 @@ def criar_template_padrao():
       }
     });
   </script>
+
+  <!-- Modal de Detalhes da Equipe -->
+  <div id="infoModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalSchoolName">Nome da Escola</h3>
+        <button onclick="closeModal()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Conteúdo dinâmico via JS -->
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 """
