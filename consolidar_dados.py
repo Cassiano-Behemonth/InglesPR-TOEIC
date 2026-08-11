@@ -5,6 +5,7 @@ import json
 import csv
 import unicodedata
 import sys
+from difflib import SequenceMatcher
 
 # Tenta importar pandas e bibliotecas do Google. Se não conseguir, avisa ou instala.
 try:
@@ -49,13 +50,38 @@ def normalize_name(name):
         r'\bVER\b', r'\bCEL\b', r'\bGEN\b', r'\bGAL\b', r'\bMAL\b', 
         r'\bSEN\b', r'\bDEP\b', r'\bPRES\b', r'\bMONS\b', r'\bCOLEGIO\b', 
         r'\bESCOLA\b', r'\bESTADUAL\b', r'\bMUNICIPAL\b', r'\bENSINO\b',
-        r'\bMEDIO\b', r'\bFUNDAMENTAL\b', r'\bINTEGRAL\b'
+        r'\bMEDIO\b', r'\bFUNDAMENTAL\b', r'\bINTEGRAL\b',
+        r'\bEFMP\b', r'\bEFM\b', r'\bEM\b', r'\bEF\b', r'\bE F M P\b', r'\bEF M\b'
     ]
     for termo in palavras_remover:
         name = re.sub(termo, ' ', name)
     # Remove múltiplos espaços e espaços no início/fim
     name = re.sub(r'\s+', ' ', name).strip()
     return name
+
+def nre_matches(nre1, nre2):
+    if not nre1 or not nre2:
+        return False
+    def clean(n):
+        n = ''.join(c for c in unicodedata.normalize('NFD', n) if unicodedata.category(c) != 'Mn')
+        return n.upper().replace('.', ' ').replace('-', ' ').strip()
+    c1 = clean(nre1)
+    c2 = clean(nre2)
+    # Verifica similaridade para tolerar pequenos erros de digitação (ex: LOANDRA vs LOANDA)
+    if SequenceMatcher(None, c1, c2).ratio() > 0.8:
+        return True
+    words1 = set(c1.split())
+    words2 = set(c2.split())
+    if ("NORTE" in words1 and "NORTE" in words2) and ("METROP" in c1 or "METROPOLITANA" in c1) and ("METROP" in c2 or "METROPOLITANA" in c2):
+        return True
+    if ("SUL" in words1 and "SUL" in words2) and ("METROP" in c1 or "METROPOLITANA" in c1) and ("METROP" in c2 or "METROPOLITANA" in c2):
+        return True
+    common = {"AREA", "NRE", "DE", "DA", "DO"}
+    w1 = words1 - common
+    w2 = words2 - common
+    if w1.intersection(w2):
+        return True
+    return False
 
 def clean_column_name(col):
     return normalize_name(col).lower()
@@ -298,8 +324,10 @@ def processar_dados():
         if not raw_name:
             continue
             
-        # Limpa o sufixo INEP se houver no nome da escola
+        # Limpa o sufixo INEP ou código se houver no nome da escola (ex: - INEP 41000000, (41000000), - 41000000)
         raw_name_clean = re.sub(r'\s*-\s*INEP\s*\d+', '', str(raw_name), flags=re.IGNORECASE).strip()
+        raw_name_clean = re.sub(r'\s*\(\s*\d+\s*\)\s*$', '', raw_name_clean).strip()
+        raw_name_clean = re.sub(r'\s*-\s*\d+\s*$', '', raw_name_clean).strip()
         norm_name = normalize_name(raw_name_clean)
         
         # Tenta extrair NRE e Cidade
@@ -346,10 +374,10 @@ def processar_dados():
             
         norm_conf = normalize_name(conf_school)
         
-        # Procura correspondência
+        # Procura correspondência com validação de NRE
         match_found = None
         for cad_item in cadastros_normalizados:
-            if not cad_item['matched'] and cad_item['norm_name'] == norm_conf:
+            if not cad_item['matched'] and cad_item['norm_name'] == norm_conf and nre_matches(cad_item['nre'], conf_nre):
                 match_found = cad_item
                 break
                 
@@ -360,8 +388,9 @@ def processar_dados():
                     n_cad = cad_item['norm_name']
                     # Se um nome normalizado contém o outro e o tamanho é próximo
                     if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 8:
-                        match_found = cad_item
-                        break
+                        if nre_matches(cad_item['nre'], conf_nre):
+                            match_found = cad_item
+                            break
 
         # Tenta encontrar a cidade real associada a essa escola no mapa original
         cidade = school_to_city_map.get(norm_conf, conf_nre)
