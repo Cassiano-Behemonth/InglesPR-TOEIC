@@ -1,12 +1,13 @@
 [build]
-  # Comando de build que instala dependências, roda o script python e prepara a pasta dist
-  command = "pip install pandas gspread google-auth && python consolidar_dados.py && mkdir -p dist && cp mapa_toeic_pr.html dist/index.html && cp mapa_toeic_pr.html dist/mapa_toeic_pr.html && cp comparativo_toeic.html dist/comparativo_toeic.html"
-  # Pasta que o Netlify deve publicar/servir na web
+  # Pasta que o Netlify serve (os arquivos são enviados prontos pelo GitHub Actions)
   publish = "dist"
+  # Cancela o build automático no servidor do Netlify para ZERAR o uso de créditos/minutos de build.
+  # O GitHub Actions compila os dados com Python e envia a pasta 'dist' pronta via Netlify CLI.
+  ignore = "exit 0"
 
-[build.environment]
-  PYTHON_VERSION = "3.10"
-  # A URL do Build Hook é injetada de propósito no HTML publicado (o botão "Atualizar
-  # Dados" faz o fetch pelo navegador). Sem esta exceção, o secrets scanning do Netlify
-  # encontra o valor na pasta dist e aborta o build.
-  SECRETS_SCAN_OMIT_KEYS = "NETLIFY_BUILD_HOOK_URL"
+# Cabeçalhos de cache estático para otimizar consumo de transferência de dados (bandwidth)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
