@@ -41,23 +41,29 @@ def normalize_name(name):
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     # Substitui pontuações por espaço
     name = re.sub(r'[.\-,\/()\[\]]', ' ', name)
-    # Remove palavras comuns de tipos de escola para focar no nome próprio
+    # Remove palavras comuns de tipos de escola e modalidades para focar no nome próprio
     palavras_remover = [
         r'\bCOLEGIO ESTADUAL\b', r'\bC E DO CAMPO\b', r'\bC E C\b', r'\bC E\b', 
-        r'\bEEB\b', r'\bE E\b', r'\bE F M\b', r'\bEM PROFIS\b', r'\bETI\b', 
+        r'\bEEB\b', r'\bE E\b', r'\bEM PROFIS\b', r'\bETI\b', r'\bCEEBJA\b',
         r'\bPROFIS\b', r'\bPROFESSOR\b', r'\bPROF\b', r'\bPROFA\b', r'\bDR\b', 
         r'\bDRA\b', r'\bPE\b', r'\bPADRE\b', r'\bDONA\b', r'\bMAIOR\b', 
         r'\bVER\b', r'\bCEL\b', r'\bGEN\b', r'\bGAL\b', r'\bMAL\b', 
         r'\bSEN\b', r'\bDEP\b', r'\bPRES\b', r'\bMONS\b', r'\bCOLEGIO\b', 
         r'\bESCOLA\b', r'\bESTADUAL\b', r'\bMUNICIPAL\b', r'\bENSINO\b',
         r'\bMEDIO\b', r'\bFUNDAMENTAL\b', r'\bINTEGRAL\b',
-        r'\bEFMP\b', r'\bEFM\b', r'\bEM\b', r'\bEF\b', r'\bE F M P\b', r'\bEF M\b'
+        r'\bEFMNP\b', r'\bEF\s*M\s*N\s*P\b', r'\bE\s*F\s*M\s*P\s*N\b', 
+        r'\bE\s*F\s*M\s*P\b', r'\bEF\s*M\s*P\b', r'\bEF\s*M\s*N\b',
+        r'\bEFMP\b', r'\bEFM\b', r'\bEM\b', r'\bEF\b', r'\bE\s*F\s*M\b', 
+        r'\bEF\s*M\b', r'\bE\s*F\b'
     ]
     for termo in palavras_remover:
         name = re.sub(termo, ' ', name)
+    # Remove letras isoladas de modalidades residuais no final (M, N, P)
+    name = re.sub(r'\b[MNP]\b', ' ', name)
     # Remove múltiplos espaços e espaços no início/fim
     name = re.sub(r'\s+', ' ', name).strip()
     return name
+
 
 def nre_matches(nre1, nre2):
     if not nre1 or not nre2:
