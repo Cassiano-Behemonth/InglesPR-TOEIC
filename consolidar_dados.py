@@ -577,17 +577,21 @@ def processar_dados():
             id_counter += 1
 
 
-    # Estatísticas consolidadas
-    total_registered_only = total_cadastradas - total_both
-    total_confirmed_only = total_confirmadas - total_both
+    # Estatísticas consolidadas (calculadas diretamente da lista final desduplicada para alinhamento perfeito dos cards com a tabela)
+    total_both = len([x for x in escolas_comparadas if x['status'] == 'both'])
+    total_registered_only = len([x for x in escolas_comparadas if x['status'] == 'registered_only'])
+    total_confirmed_only = len([x for x in escolas_comparadas if x['status'] == 'confirmed_only'])
+    total_cadastradas_unicas = total_both + total_registered_only
+    total_confirmadas_unicas = total_both + total_confirmed_only
 
     stats_comparativo = {
-        "totalConfirmadas": total_confirmadas,
-        "totalCadastradas": total_cadastradas,
+        "totalConfirmadas": total_confirmadas_unicas,
+        "totalCadastradas": total_cadastradas_unicas,
         "ambas": total_both,
         "apenasCadastro": total_registered_only,
         "apenasConfirmacao": total_confirmed_only
     }
+
 
     # Salva dados na página HTML usando o template
     criar_template_padrao()
