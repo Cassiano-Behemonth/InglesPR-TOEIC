@@ -38,6 +38,7 @@ jobs:
           cp mapa_toeic_pr.html dist/index.html
           cp mapa_toeic_pr.html dist/mapa_toeic_pr.html
           cp comparativo_toeic.html dist/comparativo_toeic.html
+          cp parana_ibge.json dist/parana_ibge.json
 
       - name: Deploy to Netlify
         run: |

@@ -608,7 +608,71 @@ def processar_dados():
         f.write(html_content)
 
     print(f"Página comparativa gerada com sucesso: '{OUTPUT_HTML}'!")
-    print(f"Estatísticas: Confirmadas={total_confirmadas} | Cadastradas={total_cadastradas} | Ambas={total_both} | Pendentes={total_registered_only}")
+    print(f"Estatísticas: Confirmadas={total_confirmadas_unicas} | Cadastradas={total_cadastradas_unicas} | Ambas={total_both} | Pendentes={total_registered_only}")
+
+    # Sincroniza em tempo real a página do Mapa com os dados comparativos (cadastrados vs faltam cadastrar)
+    atualizar_mapa_comparativo(escolas_comparadas)
+
+def atualizar_mapa_comparativo(escolas_comparadas):
+    MAP_FILE = 'mapa_toeic_pr.html'
+    if not os.path.exists(MAP_FILE):
+        return
+
+    city_map = {}
+    total_cadastradas = 0
+    total_faltam = 0
+    total_escolas = len(escolas_comparadas)
+
+    for item in escolas_comparadas:
+        cidade = normalize_name(item.get('cidade_planilha', ''))
+        nre = normalize_name(item.get('nre', ''))
+        status = item.get('status', '')
+        is_cad = status in ['both', 'registered_only']
+        
+        if is_cad:
+            total_cadastradas += 1
+        else:
+            total_faltam += 1
+
+        if cidade not in city_map:
+            city_map[cidade] = {
+                'nome': item.get('cidade_planilha', ''),
+                'cadastradas': 0,
+                'faltam': 0,
+                'total': 0,
+                'nres': set(),
+                'escolas': []
+            }
+        city_map[cidade]['total'] += 1
+        if is_cad:
+            city_map[cidade]['cadastradas'] += 1
+        else:
+            city_map[cidade]['faltam'] += 1
+        if nre:
+            city_map[cidade]['nres'].add(item.get('nre', ''))
+        city_map[cidade]['escolas'].append(item)
+
+    for c in city_map.values():
+        c['nres'] = list(c['nres'])
+        c['taxaAdesao'] = round((c['cadastradas'] / c['total'] * 100), 1) if c['total'] > 0 else 0
+
+    global_stats = {
+        'totalEscolas': total_escolas,
+        'totalCadastradas': total_cadastradas,
+        'totalFaltam': total_faltam,
+        'taxaAdesao': round((total_cadastradas / total_escolas * 100), 1) if total_escolas > 0 else 0,
+        'totalCidades': len(city_map)
+    }
+
+    with open(MAP_FILE, 'r', encoding='utf-8') as f:
+        map_content = f.read()
+
+    map_content = re.sub(r'const stats = \{.*?\};', lambda m: f'const stats = {json.dumps(global_stats)};', map_content)
+    map_content = re.sub(r'const cityMap = \{.*?\};', lambda m: f'const cityMap = {json.dumps(city_map)};', map_content, flags=re.DOTALL)
+
+    with open(MAP_FILE, 'w', encoding='utf-8') as f:
+        f.write(map_content)
+    print("Mapa de Adesão ('mapa_toeic_pr.html') atualizado em tempo real com os dados comparativos!")
 
 def criar_template_padrao():
     print(f"Criando template padrão em '{TEMPLATE_HTML}'...")
@@ -924,7 +988,7 @@ def criar_template_padrao():
       <span>TOEIC Paraná</span>
     </div>
     <div class="navbar-menu">
-      <a href="mapa_toeic_pr.html" class="nav-link">Mapa Geral</a>
+      <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
       <a href="comparativo_toeic.html" class="nav-link active">Comparativo Inscrições</a>
     </div>
   </nav>
