@@ -295,6 +295,68 @@ def processar_dados():
         except Exception as e:
             print(f"Erro ao extrair cidades do mapa original: {e}")
 
+    # Carrega o catálogo oficial de escolas ativas (para vincular municípios corretos)
+    active_schools_map = {}
+    active_schools_by_nre = {}
+    active_csv_path = "Consulta Escolas Ativas - 06-03-2026 1.xlsx - Plan1.csv"
+    if os.path.exists(active_csv_path):
+        try:
+            with open(active_csv_path, mode='r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    nre_raw = row.get('NRE', '').strip()
+                    mun_raw = row.get('MUNICIPIO', '').strip()
+                    estab_raw = row.get('ESTABELECIMENTO', '').strip()
+                    
+                    nre_clean_val = nre_raw.replace('NUCLEO REG. EDUCACAO -', '').replace('NRE', '').strip()
+                    norm_nre_val = normalize_name(nre_clean_val)
+                    norm_estab = normalize_name(estab_raw)
+                    
+                    if norm_estab:
+                        active_schools_map[(norm_estab, norm_nre_val)] = mun_raw
+                        if norm_nre_val not in active_schools_by_nre:
+                            active_schools_by_nre[norm_nre_val] = []
+                        active_schools_by_nre[norm_nre_val].append({
+                            'norm': norm_estab,
+                            'estab': estab_raw,
+                            'mun': mun_raw
+                        })
+            print(f"Carregado catálogo oficial de escolas ativas ({len(active_schools_map)} registros).")
+        except Exception as e:
+            print(f"Aviso ao carregar catálogo de escolas ativas: {e}")
+
+    def get_official_city(school_name, school_nre, match_found=None):
+        norm_s = normalize_name(school_name)
+        norm_n = normalize_name(str(school_nre).replace('NRE -', '').replace('NRE', '').strip())
+        
+        # 1. Tenta correspondência exata de (nome, NRE) no catálogo oficial de ativas
+        if (norm_s, norm_n) in active_schools_map:
+            return active_schools_map[(norm_s, norm_n)]
+            
+        # 2. Tenta busca por inclusão/substring dentro do mesmo NRE no catálogo de ativas
+        if norm_n in active_schools_by_nre:
+            for item in active_schools_by_nre[norm_n]:
+                a_norm = item['norm']
+                if (a_norm in norm_s or norm_s in a_norm) and abs(len(a_norm) - len(norm_s)) < 12:
+                    return item['mun']
+                    
+        # 3. Tenta qualquer NRE se o nome da escola for único e tiver mais de 8 caracteres
+        if len(norm_s) > 8:
+            for (a_s, a_n), mun in active_schools_map.items():
+                if a_s == norm_s or (a_s in norm_s and abs(len(a_s) - len(norm_s)) < 6):
+                    return mun
+                    
+        # 4. Se a escola cadastrada informou uma cidade válida
+        if match_found and match_found.get('cidade') and match_found['cidade'] != 'Cidade indefinida':
+            return match_found['cidade']
+            
+        # 5. Tenta o mapa original
+        if norm_s in school_to_city_map:
+            return school_to_city_map[norm_s]
+            
+        # 6. Fallback para o NRE
+        return school_nre
+
     # Carrega dados oficiais confirmados (CSV local)
     if not os.path.exists(CONFIRMADOS_CSV):
         print(f"Erro: O arquivo de confirmados '{CONFIRMADOS_CSV}' não foi encontrado.")
@@ -433,23 +495,22 @@ def processar_dados():
         # Procura correspondência com validação de NRE
         match_found = None
         for cad_item in cadastros_normalizados:
-            if not cad_item['matched'] and cad_item['norm_name'] == norm_conf and nre_matches(cad_item['nre'], conf_nre):
+            if not cad_item['matched'] and cad_item['norm_name'] == norm_conf and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
                 match_found = cad_item
                 break
                 
-        # Se não achou por igualdade exata de normalização, tenta busca por inclusão (ex: "ARTHUR DA C SILVA" em "ARTHUR DA COSTA SILVA")
+        # Se não achou por igualdade exata de normalização, tenta busca por inclusão
         if not match_found:
             for cad_item in cadastros_normalizados:
                 if not cad_item['matched']:
                     n_cad = cad_item['norm_name']
-                    # Se um nome normalizado contém o outro e o tamanho é próximo
                     if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 8:
-                        if nre_matches(cad_item['nre'], conf_nre):
+                        if not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre):
                             match_found = cad_item
                             break
 
-        # Tenta encontrar a cidade real associada a essa escola no mapa original
-        cidade = school_to_city_map.get(norm_conf, conf_nre)
+        # Tenta encontrar a cidade real oficial associada a essa escola no catálogo de ativas
+        cidade = get_official_city(conf_school, conf_nre, match_found)
 
         if match_found:
             match_found['matched'] = True
@@ -478,11 +539,12 @@ def processar_dados():
     # Passada 2: Adiciona as escolas que cadastraram mas NÃO foram confirmadas
     for cad_item in cadastros_normalizados:
         if not cad_item['matched']:
+            cidade_cad = get_official_city(cad_item['raw_name'], cad_item['nre'], cad_item)
             escolas_comparadas.append({
                 'id': id_counter,
                 'escola': cad_item['raw_name'],
                 'nre': cad_item['nre'] if cad_item['nre'] else 'NRE indefinido',
-                'cidade_planilha': cad_item['cidade'],
+                'cidade_planilha': cidade_cad,
                 'alunos': 0,
                 'status': 'registered_only',
                 'contacts': cad_item['contacts']
