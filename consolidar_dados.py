@@ -542,9 +542,28 @@ def processar_dados():
             })
         id_counter += 1
 
-    # Passada 2: Adiciona as escolas que cadastraram mas NÃO foram confirmadas
+    # Passada 2: Adiciona as escolas que cadastraram mas NÃO foram confirmadas (evitando duplicidade se a mesma escola enviou o formulário 2 vezes)
+    matched_norm_set = set()
+    for item in escolas_comparadas:
+        if item['status'] == 'both':
+            matched_norm_set.add((normalize_name(item['escola']), normalize_name(item['nre'])))
+
     for cad_item in cadastros_normalizados:
         if not cad_item['matched']:
+            norm_cad = cad_item['norm_name']
+            norm_nre_cad = normalize_name(cad_item['nre'])
+            
+            # Se essa escola já deu match em 'both' (é uma resposta duplicada do formulário para a mesma escola), ignora duplicidade
+            is_duplicate = False
+            for m_norm, m_nre in matched_norm_set:
+                if (norm_cad == m_norm or (len(norm_cad) > 8 and norm_cad in m_norm)) and (not norm_nre_cad or nre_matches(cad_item['nre'], m_nre)):
+                    is_duplicate = True
+                    break
+                    
+            if is_duplicate:
+                print(f"Ignorando resposta duplicada de formulário para escola já confirmada: '{cad_item['raw_name']}'")
+                continue
+
             cidade_cad = get_official_city(cad_item['raw_name'], cad_item['nre'], cad_item)
             escolas_comparadas.append({
                 'id': id_counter,
@@ -556,6 +575,7 @@ def processar_dados():
                 'contacts': cad_item['contacts']
             })
             id_counter += 1
+
 
     # Estatísticas consolidadas
     total_registered_only = total_cadastradas - total_both
