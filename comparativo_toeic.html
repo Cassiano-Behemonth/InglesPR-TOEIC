@@ -302,7 +302,83 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+    .btn-export-xlsx {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 6px;
+      padding: 9px 14px;
+      font-weight: 650;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+    .btn-export-xlsx:hover {
+      background: #045c43;
+      box-shadow: 0 4px 12px rgba(8, 127, 91, .25);
+      transform: translateY(-1px);
+    }
+
+    .export-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .export-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .export-card-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .export-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-download-excel {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+    .btn-download-excel:hover {
+      background: #045c43;
+      box-shadow: 0 4px 14px rgba(8, 127, 91, .3);
+      transform: translateY(-1px);
+    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -346,6 +422,27 @@
       </div>
     </section>
 
+        <section class="export-card">
+      <div>
+        <div class="export-card-title">📥 Exportar Relatório de Adesão (Excel)</div>
+        <div class="export-card-subtitle">Selecione o NRE e o Status desejado para baixar a planilha formatada:</div>
+      </div>
+      <div class="export-controls">
+        <select id="exportFilterNRE" class="select-filter">
+          <option value="all">Todos os NREs (32)</option>
+        </select>
+        <select id="exportFilterStatus" class="select-filter">
+          <option value="all">Todos os Status</option>
+          <option value="both">🟢 Apenas Cadastradas & Confirmadas</option>
+          <option value="confirmed_only">🔴 Apenas Faltam Cadastrar (Sem Cadastro)</option>
+          <option value="registered_only">🟡 Cadastrada, fora da lista oficial</option>
+        </select>
+        <button id="btnDownloadExcel" class="btn-download-excel">
+          📥 Baixar Planilha
+        </button>
+      </div>
+    </section>
+
     <section class="panel-table">
       <div class="filters">
         <input type="search" id="search" class="search-input" placeholder="Buscar por escola, município ou NRE...">
@@ -358,6 +455,7 @@
         <select id="filterNRE" class="select-filter">
           <option value="all">Todos os NREs</option>
         </select>
+        
       </div>
 
       <div style="overflow-x: auto;">
@@ -395,10 +493,10 @@
   <script>
     const statsComparativo = {
   "totalConfirmadas": 1573,
-  "totalCadastradas": 358,
-  "ambas": 357,
-  "apenasCadastro": 1,
-  "apenasConfirmacao": 1216
+  "totalCadastradas": 439,
+  "ambas": 437,
+  "apenasCadastro": 2,
+  "apenasConfirmacao": 1136
 };
     const listaEscolas = [
   {
@@ -416,8 +514,16 @@
     "nre": "APUCARANA",
     "cidade_planilha": "APUCARANA",
     "alunos": 13,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "K\u00e1tia Ord\u00e1lio",
+      "suporte": "Wilson Aparecido Ghizellini",
+      "aplicadores": [
+        "Jaqueline Fernandes Garcia",
+        "Nat\u00e1lia Del Bianco da Silva"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 3,
@@ -443,8 +549,16 @@
     "nre": "APUCARANA",
     "cidade_planilha": "MARILANDIA DO SUL",
     "alunos": 45,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "TEREZINHA SHUBA GUTIERES",
+      "suporte": "SONIA APARECIDA VOLTARELLI",
+      "aplicadores": [
+        "TEREZINHA SHUBA GUTIERES",
+        "VALDEMIR FERNANDES"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 6,
@@ -461,8 +575,16 @@
     "nre": "APUCARANA",
     "cidade_planilha": "ARAPONGAS",
     "alunos": 39,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Demis Sastre de Carvalho",
+      "suporte": "Demis Sastre de Carvalho",
+      "aplicadores": [
+        "Luci\u00f3la Casagrande",
+        "Caroline Janu\u00e1rio Rodrigues"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 8,
@@ -686,8 +808,17 @@
     "nre": "APUCARANA",
     "cidade_planilha": "MARUMBI",
     "alunos": 47,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Elaine Cristina Lopes",
+      "suporte": "Ana Laura Cardoso",
+      "aplicadores": [
+        "Maria C\u00e9lia Francisca Bissoli",
+        "Talita Isis Cordeiro",
+        "Liasmin Vitor Ati Martins"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 33,
@@ -765,8 +896,15 @@
     "nre": "APUCARANA",
     "cidade_planilha": "JANDAIA DO SUL",
     "alunos": 39,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Nanci Domingues Alves",
+      "suporte": "Henrique Machado Junior",
+      "aplicadores": [
+        "Nanci Domingues Alves"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 41,
@@ -819,8 +957,18 @@
     "nre": "APUCARANA",
     "cidade_planilha": "NOVO ITACOLOMI",
     "alunos": 31,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Maria Eduarda Rossato",
+      "suporte": "SUELI MARTINS MUNHOS DA SILVA",
+      "aplicadores": [
+        "Maria Eduarda Rossato",
+        "IEDA CRISTINA DE OLIVEIRA",
+        "MRCILENE FAVORITO DE SOUZA",
+        "Ana Paula da Silva"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 47,
@@ -873,8 +1021,15 @@
     "nre": "AREA METROP.NORTE",
     "cidade_planilha": "ALMIRANTE TAMANDARE",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Graziele Manfron Francisquini",
+      "suporte": "Evilasio Luiz da Silva Junior",
+      "aplicadores": [
+        "Fernando de Paula Fressato"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 53,
@@ -1008,8 +1163,15 @@
     "nre": "AREA METROP.NORTE",
     "cidade_planilha": "CERRO AZUL",
     "alunos": 12,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Mariete Santana de Fran\u00e7a",
+      "suporte": "Marcos da Costa Rosa",
+      "aplicadores": [
+        "Mariete Santana de Fran\u00e7a"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 64,
@@ -1524,8 +1686,18 @@
     "nre": "AREA METROP.NORTE",
     "cidade_planilha": "PINHAIS",
     "alunos": 72,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Regiane Possoli",
+      "suporte": "Luciano Sady de Oliveira",
+      "aplicadores": [
+        "Maria Angela Magni",
+        "Ronivaldo Cezar Esser",
+        "Simone Cristiane Bendlin",
+        "F\u00e1bio Roberto Batista"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 105,
@@ -1830,8 +2002,18 @@
     "nre": "AREA METROP.NORTE",
     "cidade_planilha": "DOUTOR ULYSSES",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "FRANCIELLE FITZ DE ANDRADE NECKEL",
+      "suporte": "GUINARES FERNANDES COSTA",
+      "aplicadores": [
+        "FRANCIELLE FITZ DE ANDRADE NECKEL",
+        "ALINE MONITIELE FERREIRA DOS SANTOS",
+        "GISELE CRISTINE ONGARO",
+        "ERICA CRISTINA DE MOURA E COSTA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 128,
@@ -2620,8 +2802,16 @@
     "nre": "AREA METROP.SUL",
     "cidade_planilha": "BALSA NOVA",
     "alunos": 29,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Jaciane Felde",
+      "suporte": "Misael Assump\u00e7\u00e3o Chaves",
+      "aplicadores": [
+        "Juliano Thales Henrique",
+        "Leandro Aparecido Neves"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 191,
@@ -3178,8 +3368,15 @@
     "nre": "AREA METROP.SUL",
     "cidade_planilha": "CONTENDA",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Maria Lucia Mazur",
+      "suporte": "Eder Afonso Klemba",
+      "aplicadores": [
+        "Mauricio de Oliveira Pawowski"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 236,
@@ -3455,8 +3652,17 @@
     "nre": "AREA METROP.SUL",
     "cidade_planilha": "SAO JOSE DOS PINHAIS",
     "alunos": 57,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "JULY ANNE NICHETTI FIERKA BAUER",
+      "suporte": "FABIO LONGO GOMES",
+      "aplicadores": [
+        "ERIKA DA SILVA ALVES",
+        "ROSIMERE PINHEIRO DOS SANTOS",
+        "LUCIA DOS SANTOS MAGALHAES"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 258,
@@ -3499,8 +3705,15 @@
     "nre": "AREA METROP.SUL",
     "cidade_planilha": "ARAUCARIA",
     "alunos": 7,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "GISELE DE F\u00c1TIMA ZEBONEK",
+      "suporte": "KELI CRISTINA OLIVEIRA DANELIU",
+      "aplicadores": [
+        "KARINA DO ROCIO CORDEIRO"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 262,
@@ -3898,8 +4111,16 @@
     "nre": "CAMPO MOURAO",
     "cidade_planilha": "FAROL",
     "alunos": 8,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Claudeci Rodrigues Bueno",
+      "suporte": "Celso Antonio da Silva",
+      "aplicadores": [
+        "Claudeci Rodrigues Bueno",
+        "Maria Ivonete Rodrigues Bueno"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 299,
@@ -4185,8 +4406,16 @@
     "nre": "CAMPO MOURAO",
     "cidade_planilha": "CAMPO MOURAO",
     "alunos": 38,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Douglas Fernando Blanco",
+      "suporte": "HENRIQUE SIQUEIRA CAMARA DE SOUZA",
+      "aplicadores": [
+        "ALLISSON DIEGO DOS SANTOS",
+        "SUZANE MOREIRA PINTO"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 322,
@@ -4271,8 +4500,20 @@
     "nre": "CASCAVEL",
     "cidade_planilha": "GUARANIACU",
     "alunos": 12,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Genecy Zanin Cazela",
+      "suporte": "Daniela Roman",
+      "aplicadores": [
+        "Genecy Zanin Cazela",
+        "Lauciane Piovesan Zago",
+        "Tatiane Zanin",
+        "Evelyn Banhara",
+        "Dwane Kariny Vigo",
+        "xxx"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 330,
@@ -4298,8 +4539,15 @@
     "nre": "CASCAVEL",
     "cidade_planilha": "CAFELANDIA",
     "alunos": 9,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "APARECIDA MORGENROTD",
+      "suporte": "FLAVIANA CARINA DEFINSKI",
+      "aplicadores": [
+        "APARECIDA MORGENROTD"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 333,
@@ -5039,8 +5287,16 @@
     "nre": "CIANORTE",
     "cidade_planilha": "GUAPOREMA",
     "alunos": 2,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Luiz Gustavo ZOlin",
+      "suporte": "Orly de Gasperin",
+      "aplicadores": [
+        "Luiz Gustavo ZOlin",
+        "Luiz Gustavo Zolin"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 396,
@@ -5268,8 +5524,18 @@
     "nre": "CIANORTE",
     "cidade_planilha": "SAO TOME",
     "alunos": 38,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Erica Natalia Baesse Aguilar",
+      "suporte": "Vlamir Jo\u00e3o Benassi",
+      "aplicadores": [
+        "Erica Natalia Baesse Aguilar",
+        "Rosana Mirian Luchette",
+        "Eliane Seles Maciel Louren\u00e7o",
+        "Rosangela Marinato Hernandes"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 417,
@@ -5691,8 +5957,16 @@
     "nre": "CORNELIO PROCOPIO",
     "cidade_planilha": "SANTA AMELIA",
     "alunos": 23,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Vit\u00f3ria Freitas Santos Pav\u00e3o",
+      "suporte": "Juliana Oliveira Duque",
+      "aplicadores": [
+        "Vit\u00f3ria Freitas Santos Pav\u00e3o",
+        "Vit\u00f3ria Freitas Santos Pavao"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 454,
@@ -5772,8 +6046,15 @@
     "nre": "CURITIBA",
     "cidade_planilha": "CURITIBA",
     "alunos": 16,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Suellen Fernanda Silva Baches",
+      "suporte": "Paulo Fernando Da Silva",
+      "aplicadores": [
+        "Jos\u00e9 Ricardo Mesquita Ferreira"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 463,
@@ -7040,8 +7321,18 @@
     "nre": "DOIS VIZINHOS",
     "cidade_planilha": "SALTO DO LONTRA",
     "alunos": 42,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Vanesa Kachoboski",
+      "suporte": "Mateus Gabriel Magedanz da Silva",
+      "aplicadores": [
+        "Bruno Velozo",
+        "Liliana Pires de Lima Heinzen",
+        "Gabriel Felipe Cancelier Vieira",
+        "Tiago Korink"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 592,
@@ -7123,8 +7414,15 @@
     "nre": "FOZ DO IGUACU",
     "cidade_planilha": "RAMILANDIA",
     "alunos": 30,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Valdirene Aparecida Martins",
+      "suporte": "Valdirene Aparecida Martins",
+      "aplicadores": [
+        "Valdirene Aparecida Martins"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 598,
@@ -7373,8 +7671,17 @@
     "nre": "FOZ DO IGUACU",
     "cidade_planilha": "FOZ DO IGUACU",
     "alunos": 43,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Francielly Sperandio de Souza",
+      "suporte": "Danilo Camargo de Fran\u00e7a",
+      "aplicadores": [
+        "Juliana Sacomori Bento",
+        "Roberto Leal",
+        "Danilo Camargo de Fran\u00e7a"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 624,
@@ -7784,8 +8091,16 @@
     "nre": "FRANCISCO BELTRAO",
     "cidade_planilha": "FRANCISCO BELTRAO",
     "alunos": 17,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Lilian Cristina Penteado de Farias dos Santos",
+      "suporte": "Marcio Adir Sehn",
+      "aplicadores": [
+        "Adriana Cardoso da Silva",
+        "Leonardo Copertini de Souza"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 663,
@@ -7983,8 +8298,15 @@
     "nre": "FRANCISCO BELTRAO",
     "cidade_planilha": "BARRACAO",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Elisangela da Silva Batista",
+      "suporte": "Tiago Junior Gobetti",
+      "aplicadores": [
+        "Brigida Lopes Sturm"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 680,
@@ -8019,8 +8341,15 @@
     "nre": "FRANCISCO BELTRAO",
     "cidade_planilha": "FRANCISCO BELTRAO",
     "alunos": 7,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Claudiney de Oliveira",
+      "suporte": "Leticia de Azevedo Andreta",
+      "aplicadores": [
+        "Humberto Madalena"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 684,
@@ -8197,8 +8526,15 @@
     "nre": "FRANCISCO BELTRAO",
     "cidade_planilha": "ENEAS MARQUES",
     "alunos": 7,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Talita Vanessa de Matos Gobbi",
+      "suporte": "Marcia Garcia",
+      "aplicadores": [
+        "Ivaneidh Cirilo dos Santos"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 699,
@@ -8241,8 +8577,17 @@
     "nre": "GOIOERE",
     "cidade_planilha": "UBIRATA",
     "alunos": 15,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Miriam Leite Vieira Guimar\u00e3es",
+      "suporte": "Tania Maria Arestides de Almeida",
+      "aplicadores": [
+        "Miriam Leite Vieira Guimar\u00e3es",
+        "Edilaine de F\u00e1tima Roz\u00e1rio",
+        "Eduardo Bertoli Ludwig"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 703,
@@ -8250,8 +8595,18 @@
     "nre": "GOIOERE",
     "cidade_planilha": "GOIOERE",
     "alunos": 70,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "MONICA HEIDRICH SANTOS PASINATO",
+      "suporte": "Jeferson Rodrigo De Oliveira",
+      "aplicadores": [
+        "MONICA HEIDRICH SANTOS PASINATO",
+        "ROSANGELA MAZZARO TRAVESSOLO SILVA",
+        "ANDRESSA BASAGLIA",
+        "DJENNEFER LURDES COPPO"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 704,
@@ -8286,8 +8641,15 @@
     "nre": "GOIOERE",
     "cidade_planilha": "UBIRATA",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "VIVIANE HENRIQUE DE OLIVEIRA",
+      "suporte": "ANNA LUIZA ORTENCIO MENDES ALVES",
+      "aplicadores": [
+        "VIVIANE HENRIQUE DE OLIVEIRA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 708,
@@ -8295,8 +8657,17 @@
     "nre": "GOIOERE",
     "cidade_planilha": "MARILUZ",
     "alunos": 51,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Lucin\u00e9ia Rodrigues Chaves",
+      "suporte": "Luiz Fernando dos Santos das Merces",
+      "aplicadores": [
+        "Marisa Trevisan de Almeida",
+        "Marcia Kovalczuk Oliveira",
+        "Allana Kristyna Moreira Dutra"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 709,
@@ -8313,8 +8684,15 @@
     "nre": "GOIOERE",
     "cidade_planilha": "MOREIRA SALES",
     "alunos": 3,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Giseli Lima dos Santos",
+      "suporte": "Alessandra de Moura Vieira",
+      "aplicadores": [
+        "Giseli Lima dos Santos"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 711,
@@ -8340,8 +8718,15 @@
     "nre": "GOIOERE",
     "cidade_planilha": "BOA ESPERANCA",
     "alunos": 12,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Vera Lucia de Almeida Brustulin",
+      "suporte": "Vera Lucia de Almeida Brustulin",
+      "aplicadores": [
+        "Jaqueline Fernanda Bertin"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 714,
@@ -8358,8 +8743,16 @@
     "nre": "GOIOERE",
     "cidade_planilha": "RANCHO ALEGRE DO OESTE",
     "alunos": 17,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Eliane dos Santos Macedo Oliveira",
+      "suporte": "Everton Josimar de Oliveira",
+      "aplicadores": [
+        "F\u00e1bio Santana de Oliveira",
+        "."
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 716,
@@ -8410,8 +8803,15 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "CANDOI",
     "alunos": 11,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Taynara Passos Stotzer",
+      "suporte": "Erineu Badzinski",
+      "aplicadores": [
+        "Giselle Bueno Freitas"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 721,
@@ -8516,8 +8916,15 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "GUARAPUAVA",
     "alunos": 12,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Marcos Mileski",
+      "suporte": "Esmario Gomes de Oliveira",
+      "aplicadores": [
+        "Jaqueline de Andrade Borges"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 732,
@@ -8525,8 +8932,16 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "TURVO",
     "alunos": 16,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "CRISTIANE SCHROEDER BUENO",
+      "suporte": "Maria Beatriz Fernandes",
+      "aplicadores": [
+        "CRISTIANE SCHROEDER BUENO",
+        "Cristiane Schroeder Bueno"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 733,
@@ -8660,8 +9075,19 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "GUARAPUAVA",
     "alunos": 52,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "EDIANE GOMES DE LIMA",
+      "suporte": "JOAO MAURICIO CALDAS",
+      "aplicadores": [
+        "EDIANE GOMES DE LIMA",
+        "DIEGO HENRIQUE WITCHEMICHEN",
+        "LUCIANE MONTEIRO AZEVEDO",
+        "THALLES FELIPE HORN",
+        "MARIANA FERREIRA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 748,
@@ -8714,8 +9140,16 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "CANDOI",
     "alunos": 27,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Maril\u00e9ia Ivatiuk Dias Lignane",
+      "suporte": "Keorlly Cabral Kegler",
+      "aplicadores": [
+        "Maril\u00e9ia Ivatiuk Dias Lignane",
+        "Dayana Dias Lima"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 754,
@@ -8750,8 +9184,15 @@
     "nre": "GUARAPUAVA",
     "cidade_planilha": "GOIOXIM",
     "alunos": 5,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ALCIONE FERREIRA RAMOS",
+      "suporte": "ALCIONE FERREIRA RAMOS",
+      "aplicadores": [
+        "ALCIONE FERREIRA RAMOS"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 757,
@@ -9049,8 +9490,16 @@
     "nre": "IBAITI",
     "cidade_planilha": "IBAITI",
     "alunos": 18,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Michel Araujo Capote",
+      "suporte": "LUIZ GUSTAVO TAVARES",
+      "aplicadores": [
+        "LAERCIO FAUSTINO DA SILVA JUNIOR",
+        "JOS\u00c9 MARIO MANATA VEIGA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 782,
@@ -9988,8 +10437,17 @@
     "nre": "IVAIPORA",
     "cidade_planilha": "MANOEL RIBAS",
     "alunos": 55,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ANA CLAUDIA CORONA",
+      "suporte": "ALINE DE JESUS RODRIGUES",
+      "aplicadores": [
+        "LEONI HEMKMEIER DARICM",
+        "MAGALI GRACIELI STRASSACAPA",
+        "LUC\u00cdOLA SILVEIRA FEDEL"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 863,
@@ -10014,8 +10472,15 @@
     "nre": "IVAIPORA",
     "cidade_planilha": "ARAPUA",
     "alunos": 2,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Marli Daniel Schmitz",
+      "suporte": "Marli Daniel Schmitz",
+      "aplicadores": [
+        "APARECIDA DE FREITAS DA SILVA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 865,
@@ -10032,8 +10497,15 @@
     "nre": "IVAIPORA",
     "cidade_planilha": "SAO PEDRO DO IVAI",
     "alunos": 13,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Edney Bosso de Leon",
+      "suporte": "Luciana Pedrina Bonini Bolognini",
+      "aplicadores": [
+        "Lisandra Oliveira Bernini"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 867,
@@ -10378,8 +10850,15 @@
     "nre": "LARANJEIRAS DO SUL",
     "cidade_planilha": "QUEDAS DO IGUACU",
     "alunos": 2,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "LEDIANE ELEANDRA NEGOCEKI ANDREIV",
+      "suporte": "DECARTER ANTONIO LOTTICI",
+      "aplicadores": [
+        "RENAN AUGUSTO BARBOSA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 903,
@@ -10473,8 +10952,16 @@
     "nre": "LARANJEIRAS DO SUL",
     "cidade_planilha": "FAXINAL",
     "alunos": 8,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Ced\u00e2nia Carrer",
+      "suporte": "Gilmar Jo\u00e3o Kranz Junior",
+      "aplicadores": [
+        "Ced\u00e2nia Carrer",
+        "Cedania Carrer"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 912,
@@ -10570,8 +11057,15 @@
     "nre": "LARANJEIRAS DO SUL",
     "cidade_planilha": "MARQUINHO",
     "alunos": 10,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Susana Heupa Huf",
+      "suporte": "Susana  Heupa Huf",
+      "aplicadores": [
+        "Susana Heupa Huf"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 922,
@@ -10606,8 +11100,15 @@
     "nre": "LARANJEIRAS DO SUL",
     "cidade_planilha": "LARANJEIRAS DO SUL",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Vanessa Duarte da Silva",
+      "suporte": "Daniele Zanini",
+      "aplicadores": [
+        "NEUSA DE FATIMA SAVARIS"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 926,
@@ -10615,8 +11116,15 @@
     "nre": "LARANJEIRAS DO SUL",
     "cidade_planilha": "LARANJEIRAS DO SUL",
     "alunos": 1,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Rosemara Pereira de Souza",
+      "suporte": "SandrA Mara Martins",
+      "aplicadores": [
+        "Rosemara Pereira de Souza"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 927,
@@ -10915,8 +11423,16 @@
     "nre": "LOANDA",
     "cidade_planilha": "QUERENCIA DO NORTE",
     "alunos": 21,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "NEIDE BATISTA MOREIRA SILVA",
+      "suporte": "ANGELA MARIA PEREIRA GOMES",
+      "aplicadores": [
+        "AURENILDO RIBEIRO DA CRUZ",
+        "CLEIA CRISTINA GUIMAR\u00c3ES"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 952,
@@ -10975,8 +11491,16 @@
     "nre": "LOANDA",
     "cidade_planilha": "LOANDA",
     "alunos": 25,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Sandra Maria Straube",
+      "suporte": "Pascoal Teruyiro Sato",
+      "aplicadores": [
+        "Sandra Mara Gomes da Paix\u00e3o",
+        "Elvira Luciana de Souza de Andrade"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 957,
@@ -11273,8 +11797,18 @@
     "nre": "LONDRINA",
     "cidade_planilha": "PRIMEIRO DE MAIO",
     "alunos": 29,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Silvia Monteiro  Bonanceia",
+      "suporte": "Adilson Souza Cruz",
+      "aplicadores": [
+        "Silvia Monteiro  Bonanceia",
+        "Silvia Monteiro Bonanceia",
+        "Sintia Elena  Monteiro Machado",
+        "Stella Rodrigues da  Costa Mondeck"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 984,
@@ -11853,8 +12387,19 @@
     "nre": "LONDRINA",
     "cidade_planilha": "IBIPORA",
     "alunos": 40,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ELENITA SERRA LACHIMIA",
+      "suporte": "EVERSON MARION",
+      "aplicadores": [
+        "ELENITA SERRA LACHIMIA",
+        "ANGELITA DE PAULA SILVA",
+        "ZILMARA ELAINE DANTE",
+        "CARLA MONTENEGRO BALAN NOBILE",
+        "SUELI DA CRUZ RAIMUNDO"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1037,
@@ -12328,8 +12873,16 @@
     "nre": "MARINGA",
     "cidade_planilha": "ASTORGA",
     "alunos": 31,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Dejair Aparecido dos Santos",
+      "suporte": "Vera Lucia Zanchi Garcia",
+      "aplicadores": [
+        "Marisa Bianchini",
+        "Ellen Braga Correa"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1086,
@@ -12560,8 +13113,15 @@
     "nre": "MARINGA",
     "cidade_planilha": "PAICANDU",
     "alunos": 47,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Aureana Hundzinski Fernandes",
+      "suporte": "Anderson Aparecido Frugerio",
+      "aplicadores": [
+        "Aureana Hundzinski Fernandes"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1111,
@@ -12686,8 +13246,16 @@
     "nre": "MARINGA",
     "cidade_planilha": "MANDAGUARI",
     "alunos": 4,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Maria Aparecida dos Santos Fineto",
+      "suporte": "Andre Augusto Rossetti Lucca",
+      "aplicadores": [
+        "Marcia Catarin Rissi",
+        "Tatiana Borges da Silva"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1125,
@@ -12794,8 +13362,17 @@
     "nre": "MARINGA",
     "cidade_planilha": "MARINGA",
     "alunos": 41,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Marcil\u00e9ia Ramirez de Lima Bonilha",
+      "suporte": "Roger Silva Oliveira",
+      "aplicadores": [
+        "Marcil\u00e9ia Ramirez de Lima Bonilha",
+        "Viviane Regina Ambrosio",
+        "Sandra Aparecida Ortiz Larrosa"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1137,
@@ -12938,8 +13515,15 @@
     "nre": "PARANAGUA",
     "cidade_planilha": "PARANAGUA",
     "alunos": 13,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Raquel Sant Ana Martins",
+      "suporte": "Guilherme Almeida Fernandes",
+      "aplicadores": [
+        "Raquel Sant Ana Martins"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1153,
@@ -12974,8 +13558,15 @@
     "nre": "PARANAGUA",
     "cidade_planilha": "PARANAGUA",
     "alunos": 1,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ELIENE CORREIA DA SILVA",
+      "suporte": "Bruno de Oliveira Dalago",
+      "aplicadores": [
+        "ELIENE CORREIA DA SILVA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1157,
@@ -13106,8 +13697,15 @@
     "nre": "PARANAGUA",
     "cidade_planilha": "PONTAL DO PARANA",
     "alunos": 20,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "IARA BERNER RITA",
+      "suporte": "PETERSON RICARDO GOMES NUNES",
+      "aplicadores": [
+        "IARA BERNER RITA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1170,
@@ -13325,8 +13923,15 @@
     "nre": "PARANAVAI",
     "cidade_planilha": "PARANAVAI",
     "alunos": 5,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Juliana de Lima",
+      "suporte": "Juliana de Lima",
+      "aplicadores": [
+        "Juliana de Lima"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1191,
@@ -13734,8 +14339,15 @@
     "nre": "PATO BRANCO",
     "cidade_planilha": "PALMAS",
     "alunos": 2,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Juscilei Terezinha Stefan",
+      "suporte": "DEBORA PEREIRA FERREIRA",
+      "aplicadores": [
+        "Juscilei Terezinha Stefan"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1234,
@@ -14403,8 +15015,17 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "CASTRO",
     "alunos": 48,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "NOELI MARIA HEY BONDANCIA",
+      "suporte": "ANDREA DE F\u00c1TIMA LIMA ANDRADE",
+      "aplicadores": [
+        "NOELI MARIA HEY BONDANCIA",
+        "ANDREZA DO ROCIO POLI",
+        "VIVIANE MARIA DE SOUZA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1306,
@@ -14634,8 +15255,15 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "CASTRO",
     "alunos": 9,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Rosilda de Oliveira",
+      "suporte": "Jos\u00e9 Luciano Gomes Marcondes",
+      "aplicadores": [
+        "Sonia Aparecida Pinheiro"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1327,
@@ -14715,8 +15343,15 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "PALMEIRA",
     "alunos": 11,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "LUCIANA STURIALE SARTINI",
+      "suporte": "ELIO ERNANI BUDZIAK",
+      "aplicadores": [
+        "LUCIANA STURIALE SARTINI"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1336,
@@ -14888,8 +15523,16 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "TIBAGI",
     "alunos": 28,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "CHRISTIANE MELLO DE CAMARGO",
+      "suporte": "VANDERLEI DOS SANTOS",
+      "aplicadores": [
+        "CHRISTIANE MELLO DE CAMARGO",
+        "NATIELE PACHECO DOS SANTOS"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1350,
@@ -14968,8 +15611,15 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "CASTRO",
     "alunos": 4,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "MARIA INEZ",
+      "suporte": "AURELIO GIOVANNY DA SILVA",
+      "aplicadores": [
+        "MARLI TERESINHA FILUS"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1358,
@@ -15080,8 +15730,16 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "PONTA GROSSA",
     "alunos": 37,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Ricardo Gaspar Vieira",
+      "suporte": "LUCIO MAURO DE CAMPOS",
+      "aplicadores": [
+        "Priscila Ribas Teixeira",
+        "Mayara Batista Vaz Mateus"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1368,
@@ -15089,8 +15747,17 @@
     "nre": "PONTA GROSSA",
     "cidade_planilha": "IMBITUVA",
     "alunos": 35,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Glauciane Alessi Ienke",
+      "suporte": "Marciel.Rodrigo Pereira",
+      "aplicadores": [
+        "Glauciane Alessi Ienke",
+        "Joelson Diedrichs",
+        "Carlos Eduardo Bittencourt Gomes"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1369,
@@ -15274,8 +15941,15 @@
     "nre": "TELEMACO BORBA",
     "cidade_planilha": "TELEMACO BORBA",
     "alunos": 5,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ALTAIR JORGE PEREIRA",
+      "suporte": "A\u00c9CIO RIBEIRO",
+      "aplicadores": [
+        "LUCIANA APARECIDA DE OLIVEIRA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1386,
@@ -15337,8 +16011,16 @@
     "nre": "TELEMACO BORBA",
     "cidade_planilha": "TELEMACO BORBA",
     "alunos": 7,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "ADRIANE APARECIDA DA SILVA BUENO",
+      "suporte": "ODETE BITTENCOURT",
+      "aplicadores": [
+        "ADRIANE APARECIDA DA SILVA BUENO",
+        "ADRIANE aPARECIDA DA SILVA BUENO"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1393,
@@ -16270,8 +16952,16 @@
     "nre": "UMUARAMA",
     "cidade_planilha": "NOVA OLIMPIA",
     "alunos": 29,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Maria Cristina bandeira Gobo",
+      "suporte": "David Fernando dos Santos Viana",
+      "aplicadores": [
+        "Samantha Evelin Reducino Farina",
+        "David Fernando Viana dos Santos"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1477,
@@ -16427,8 +17117,15 @@
     "nre": "UMUARAMA",
     "cidade_planilha": "UMUARAMA",
     "alunos": 6,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "NEURACI APARECIDA BANDEIRA",
+      "suporte": "Marcio Jos\u00e9 Barrada de Abreu",
+      "aplicadores": [
+        "Sandra Renata  dos Santos Paulichi"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1491,
@@ -16462,8 +17159,16 @@
     "nre": "UMUARAMA",
     "cidade_planilha": "PEROLA",
     "alunos": 15,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "PALOMA TOMAZ",
+      "suporte": "RODRIGO SIBILIM DE SOUSA",
+      "aplicadores": [
+        "PALOMA TOMAZ",
+        "ISADORA WIECZOREK RODRIGUES"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1494,
@@ -16532,8 +17237,15 @@
     "nre": "UMUARAMA",
     "cidade_planilha": "UMUARAMA",
     "alunos": 9,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "MATHEUS CORR\u00caA DE oLIVEIRA",
+      "suporte": "MATHEUS CORREA DE OLIVEIRA",
+      "aplicadores": [
+        "LUANA CRISTINA RAMOS BARBOSA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1501,
@@ -16584,8 +17296,15 @@
     "nre": "UMUARAMA",
     "cidade_planilha": "UMUARAMA",
     "alunos": 13,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Wagner Menechini",
+      "suporte": "Cristina Fumie Harigaya",
+      "aplicadores": [
+        "Fabiano Fagundes Jacomi"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1506,
@@ -16627,8 +17346,15 @@
     "nre": "UNIAO DA VITORIA",
     "cidade_planilha": "UNIAO DA VITORIA",
     "alunos": 7,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Luiz Antonio Valentin dos Santos",
+      "suporte": "Daiane Glaza Lopes Roscher",
+      "aplicadores": [
+        "MARCIA MARIA DA MAIA"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1510,
@@ -17265,8 +17991,15 @@
     "nre": "WENCESLAU BRAZ",
     "cidade_planilha": "JAGUARIAIVA",
     "alunos": 11,
-    "status": "confirmed_only",
-    "contacts": null
+    "status": "both",
+    "contacts": {
+      "rt": "Indianara de Oliveira Rodrigues dos Santos",
+      "suporte": "Natan Soares de Paula",
+      "aplicadores": [
+        "Eli Regina de Freitas Fonseca"
+      ],
+      "extra_aplicadores": ""
+    }
   },
   {
     "id": 1569,
@@ -17328,8 +18061,29 @@
       ],
       "extra_aplicadores": ""
     }
+  },
+  {
+    "id": 1575,
+    "escola": "HUMBERTO DE A C BRANCO, E E C-EF",
+    "nre": "Apucarana",
+    "cidade_planilha": "JANDAIA DO SUL",
+    "alunos": 0,
+    "status": "registered_only",
+    "contacts": {
+      "rt": "Jackeline Mondini Val\u00e9rio",
+      "suporte": "Jackeline Mondini Val\u00e9rio",
+      "aplicadores": [
+        "Jos\u00e9 Alexandre Cortez"
+      ],
+      "extra_aplicadores": ""
+    }
   }
 ];
+
+    
+    function norm(str) {
+      return String(str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+    }
 
     const fmt = new Intl.NumberFormat('pt-BR');
 
@@ -17340,15 +18094,23 @@
     document.getElementById('statPend').textContent = fmt.format(statsComparativo.apenasCadastro);
     document.getElementById('statNoCad').textContent = fmt.format(statsComparativo.apenasConfirmacao);
 
-    // Popula o select de NRE
+    // Popula o select de NREs (Filtro Principal e Seção de Exportação)
     const nres = [...new Set(listaEscolas.map(e => e.nre).filter(Boolean))].sort();
-    const selectNRE = document.getElementById('filterNRE');
-    nres.forEach(nre => {
-      const opt = document.createElement('option');
-      opt.value = nre;
-      opt.textContent = nre;
-      selectNRE.appendChild(opt);
-    });
+
+    function populateNreSelect(elemId) {
+      const selectElem = document.getElementById(elemId);
+      if (selectElem) {
+        selectElem.innerHTML = '<option value="all">Todos os NREs (32)</option>';
+        nres.forEach(nre => {
+          const opt = document.createElement('option');
+          opt.value = nre;
+          opt.textContent = `NRE ${nre}`;
+          selectElem.appendChild(opt);
+        });
+      }
+    }
+    populateNreSelect('filterNRE');
+    populateNreSelect('exportFilterNRE');
 
     const statusLabels = {
       'both': 'Confirmado & Cadastrado',
@@ -17480,14 +18242,102 @@
       }
     });
 
-    document.getElementById('search').addEventListener('input', renderTable);
-    document.getElementById('filterStatus').addEventListener('change', renderTable);
-    document.getElementById('filterNRE').addEventListener('change', renderTable);
+    let currentFilteredSchools = [];
 
-    // Renderiza inicial
+    const origRenderTable = renderTable;
+    renderTable = function() {
+      origRenderTable();
+      const q = norm(document.getElementById('search').value);
+      const st = document.getElementById('filterStatus').value;
+      const nre = document.getElementById('filterNRE').value;
+
+      currentFilteredSchools = listaEscolas.filter(item => {
+        const matchStatus = st === 'all' || item.status === st;
+        const matchNRE = nre === 'all' || item.nre === nre;
+        const matchQuery = !q || [item.escola, item.cidade_planilha, item.nre].some(f => norm(f).includes(q));
+        return matchStatus && matchNRE && matchQuery;
+      });
+    };
+
+    
+    
+    // Filtros da Tabela (independentes da exportação)
+    const searchElem = document.getElementById('search');
+    if (searchElem) searchElem.addEventListener('input', renderTable);
+    
+    const filterStElem = document.getElementById('filterStatus');
+    if (filterStElem) filterStElem.addEventListener('change', renderTable);
+    
+    const filterNreElem = document.getElementById('filterNRE');
+    if (filterNreElem) filterNreElem.addEventListener('change', renderTable);
+
+    // Botão Baixar Planilha (independente da tabela)
+    const btnDownload = document.getElementById('btnDownloadExcel');
+    if (btnDownload) {
+      btnDownload.addEventListener('click', function() {
+        if (typeof XLSX === 'undefined') {
+          alert('Carregando gerador de Excel... tente novamente em 2 segundos.');
+          return;
+        }
+
+        const st = document.getElementById('exportFilterStatus')?.value || 'all';
+        const nre = document.getElementById('exportFilterNRE')?.value || 'all';
+
+        const filtered = listaEscolas.filter(item => {
+          const matchStatus = (st === 'all') || (item.status === st);
+          const matchNRE = (nre === 'all') || (item.nre === nre);
+          return matchStatus && matchNRE;
+        });
+
+        if (filtered.length === 0) {
+          alert('Nenhuma escola encontrada com os filtros de exportação selecionados.');
+          return;
+        }
+
+        const rows = filtered.map(item => {
+          let statusTexto = 'Falta Cadastrar';
+          if (item.status === 'both') statusTexto = 'Cadastrada & Confirmada';
+          else if (item.status === 'registered_only') statusTexto = 'Cadastrada (Pendente Oficial)';
+
+          const c = item.contacts || {};
+          return {
+            'NRE': item.nre || '',
+            'Município': item.cidade_planilha || '',
+            'Escola': item.escola || '',
+            'Status': statusTexto,
+            'Alunos Confirmados': item.alunos || 0,
+            'Responsável Técnico (RT)': c.rt || '',
+            'Suporte Técnico': c.suporte || '',
+            'Aplicadores': Array.isArray(c.aplicadores) ? c.aplicadores.join('; ') : '',
+            'Observações / Extra': c.extra_aplicadores || ''
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = [
+          { wch: 22 },
+          { wch: 22 },
+          { wch: 48 },
+          { wch: 28 },
+          { wch: 18 },
+          { wch: 30 },
+          { wch: 30 },
+          { wch: 38 },
+          { wch: 32 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Relatório TOEIC');
+
+        let nameNre = nre !== 'all' ? nre.replace(/\s+/g, '_') : 'Todos_NREs';
+        let nameSt = st !== 'all' ? st : 'Geral';
+
+        const fileName = `Relatorio_TOEIC_${nameNre}_${nameSt}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+      });
+    }
+
     renderTable();
-
-
   </script>
 </body>
 </html>

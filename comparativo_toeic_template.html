@@ -302,7 +302,83 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+    .btn-export-xlsx {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 6px;
+      padding: 9px 14px;
+      font-weight: 650;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+    .btn-export-xlsx:hover {
+      background: #045c43;
+      box-shadow: 0 4px 12px rgba(8, 127, 91, .25);
+      transform: translateY(-1px);
+    }
+
+    .export-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .export-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .export-card-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .export-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-download-excel {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+    .btn-download-excel:hover {
+      background: #045c43;
+      box-shadow: 0 4px 14px rgba(8, 127, 91, .3);
+      transform: translateY(-1px);
+    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -346,6 +422,27 @@
       </div>
     </section>
 
+        <section class="export-card">
+      <div>
+        <div class="export-card-title">📥 Exportar Relatório de Adesão (Excel)</div>
+        <div class="export-card-subtitle">Selecione o NRE e o Status desejado para baixar a planilha formatada:</div>
+      </div>
+      <div class="export-controls">
+        <select id="exportFilterNRE" class="select-filter">
+          <option value="all">Todos os NREs (32)</option>
+        </select>
+        <select id="exportFilterStatus" class="select-filter">
+          <option value="all">Todos os Status</option>
+          <option value="both">🟢 Apenas Cadastradas & Confirmadas</option>
+          <option value="confirmed_only">🔴 Apenas Faltam Cadastrar (Sem Cadastro)</option>
+          <option value="registered_only">🟡 Cadastrada, fora da lista oficial</option>
+        </select>
+        <button id="btnDownloadExcel" class="btn-download-excel">
+          📥 Baixar Planilha
+        </button>
+      </div>
+    </section>
+
     <section class="panel-table">
       <div class="filters">
         <input type="search" id="search" class="search-input" placeholder="Buscar por escola, município ou NRE...">
@@ -358,6 +455,7 @@
         <select id="filterNRE" class="select-filter">
           <option value="all">Todos os NREs</option>
         </select>
+        
       </div>
 
       <div style="overflow-x: auto;">
@@ -396,6 +494,11 @@
     /*DATA_STATS_PLACEHOLDER*/
     /*DATA_LISTA_PLACEHOLDER*/
 
+    
+    function norm(str) {
+      return String(str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+    }
+
     const fmt = new Intl.NumberFormat('pt-BR');
 
     // Inicializa Stats
@@ -405,15 +508,23 @@
     document.getElementById('statPend').textContent = fmt.format(statsComparativo.apenasCadastro);
     document.getElementById('statNoCad').textContent = fmt.format(statsComparativo.apenasConfirmacao);
 
-    // Popula o select de NRE
+    // Popula o select de NREs (Filtro Principal e Seção de Exportação)
     const nres = [...new Set(listaEscolas.map(e => e.nre).filter(Boolean))].sort();
-    const selectNRE = document.getElementById('filterNRE');
-    nres.forEach(nre => {
-      const opt = document.createElement('option');
-      opt.value = nre;
-      opt.textContent = nre;
-      selectNRE.appendChild(opt);
-    });
+
+    function populateNreSelect(elemId) {
+      const selectElem = document.getElementById(elemId);
+      if (selectElem) {
+        selectElem.innerHTML = '<option value="all">Todos os NREs (32)</option>';
+        nres.forEach(nre => {
+          const opt = document.createElement('option');
+          opt.value = nre;
+          opt.textContent = `NRE ${nre}`;
+          selectElem.appendChild(opt);
+        });
+      }
+    }
+    populateNreSelect('filterNRE');
+    populateNreSelect('exportFilterNRE');
 
     const statusLabels = {
       'both': 'Confirmado & Cadastrado',
@@ -545,14 +656,102 @@
       }
     });
 
-    document.getElementById('search').addEventListener('input', renderTable);
-    document.getElementById('filterStatus').addEventListener('change', renderTable);
-    document.getElementById('filterNRE').addEventListener('change', renderTable);
+    let currentFilteredSchools = [];
 
-    // Renderiza inicial
+    const origRenderTable = renderTable;
+    renderTable = function() {
+      origRenderTable();
+      const q = norm(document.getElementById('search').value);
+      const st = document.getElementById('filterStatus').value;
+      const nre = document.getElementById('filterNRE').value;
+
+      currentFilteredSchools = listaEscolas.filter(item => {
+        const matchStatus = st === 'all' || item.status === st;
+        const matchNRE = nre === 'all' || item.nre === nre;
+        const matchQuery = !q || [item.escola, item.cidade_planilha, item.nre].some(f => norm(f).includes(q));
+        return matchStatus && matchNRE && matchQuery;
+      });
+    };
+
+    
+    
+    // Filtros da Tabela (independentes da exportação)
+    const searchElem = document.getElementById('search');
+    if (searchElem) searchElem.addEventListener('input', renderTable);
+    
+    const filterStElem = document.getElementById('filterStatus');
+    if (filterStElem) filterStElem.addEventListener('change', renderTable);
+    
+    const filterNreElem = document.getElementById('filterNRE');
+    if (filterNreElem) filterNreElem.addEventListener('change', renderTable);
+
+    // Botão Baixar Planilha (independente da tabela)
+    const btnDownload = document.getElementById('btnDownloadExcel');
+    if (btnDownload) {
+      btnDownload.addEventListener('click', function() {
+        if (typeof XLSX === 'undefined') {
+          alert('Carregando gerador de Excel... tente novamente em 2 segundos.');
+          return;
+        }
+
+        const st = document.getElementById('exportFilterStatus')?.value || 'all';
+        const nre = document.getElementById('exportFilterNRE')?.value || 'all';
+
+        const filtered = listaEscolas.filter(item => {
+          const matchStatus = (st === 'all') || (item.status === st);
+          const matchNRE = (nre === 'all') || (item.nre === nre);
+          return matchStatus && matchNRE;
+        });
+
+        if (filtered.length === 0) {
+          alert('Nenhuma escola encontrada com os filtros de exportação selecionados.');
+          return;
+        }
+
+        const rows = filtered.map(item => {
+          let statusTexto = 'Falta Cadastrar';
+          if (item.status === 'both') statusTexto = 'Cadastrada & Confirmada';
+          else if (item.status === 'registered_only') statusTexto = 'Cadastrada (Pendente Oficial)';
+
+          const c = item.contacts || {};
+          return {
+            'NRE': item.nre || '',
+            'Município': item.cidade_planilha || '',
+            'Escola': item.escola || '',
+            'Status': statusTexto,
+            'Alunos Confirmados': item.alunos || 0,
+            'Responsável Técnico (RT)': c.rt || '',
+            'Suporte Técnico': c.suporte || '',
+            'Aplicadores': Array.isArray(c.aplicadores) ? c.aplicadores.join('; ') : '',
+            'Observações / Extra': c.extra_aplicadores || ''
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = [
+          { wch: 22 },
+          { wch: 22 },
+          { wch: 48 },
+          { wch: 28 },
+          { wch: 18 },
+          { wch: 30 },
+          { wch: 30 },
+          { wch: 38 },
+          { wch: 32 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Relatório TOEIC');
+
+        let nameNre = nre !== 'all' ? nre.replace(/\s+/g, '_') : 'Todos_NREs';
+        let nameSt = st !== 'all' ? st : 'Geral';
+
+        const fileName = `Relatorio_TOEIC_${nameNre}_${nameSt}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+      });
+    }
+
     renderTable();
-
-
   </script>
 </body>
 </html>
