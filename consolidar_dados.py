@@ -188,7 +188,7 @@ def make_headers_unique(headers):
 def get_school_name_from_row(row):
     for col, val in row.items():
         col_lower = col.lower()
-        if col_lower.startswith('nre - ') and 'unidade de' in col_lower:
+        if ('nre' in col_lower and 'unidade' in col_lower) or col == 'Coluna 19':
             val_str = str(val).strip()
             if val_str and val_str != 'nan' and val_str != '':
                 return val_str
@@ -501,17 +501,30 @@ def processar_dados():
         # Procura correspondência com validação de NRE
         match_found = None
         for cad_item in cadastros_normalizados:
-            if not cad_item['matched'] and cad_item['norm_name'] == norm_conf and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
-                match_found = cad_item
-                break
+            if not cad_item['matched'] and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
+                n_cad = cad_item['norm_name']
+                if n_cad == norm_conf:
+                    match_found = cad_item
+                    break
                 
-        # Se não achou por igualdade exata de normalização, tenta busca por inclusão
+        # Se não achou por igualdade exata de normalização, tenta busca por inclusão ou abreviação inteligente
         if not match_found:
             for cad_item in cadastros_normalizados:
-                if not cad_item['matched']:
+                if not cad_item['matched'] and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
                     n_cad = cad_item['norm_name']
-                    if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 8:
-                        if not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre):
+                    if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 12:
+                        match_found = cad_item
+                        break
+                    # Checa tolerância a abreviações e preposições (ex: CARLOS DRUMMOND DE ANDRADE vs CARLOS D DE ANDRADE, ANTONIO CASTRO ALVES vs ANTONIO DE CASTRO ALVES)
+                    w1 = [w for w in n_cad.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
+                    w2 = [w for w in norm_conf.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
+                    if len(w1) == len(w2) and len(w1) > 0:
+                        m_all = True
+                        for a, b in zip(w1, w2):
+                            if a != b and not (len(a) == 1 and b.startswith(a)) and not (len(b) == 1 and a.startswith(b)):
+                                m_all = False
+                                break
+                        if m_all:
                             match_found = cad_item
                             break
 
