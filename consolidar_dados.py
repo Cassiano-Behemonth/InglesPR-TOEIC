@@ -43,9 +43,9 @@ def normalize_name(name):
     name = re.sub(r'[.\-,\/()\[\]]', ' ', name)
     # Remove palavras comuns de tipos de escola e modalidades para focar no nome próprio
     palavras_remover = [
-        r'\bCOLEGIO ESTADUAL\b', r'\bC E DO CAMPO\b', r'\bC E C\b', r'\bC E\b', 
-        r'\bEEB\b', r'\bE E\b', r'\bEM PROFIS\b', r'\bETI\b', r'\bCEEBJA\b',
-        r'\bPROFIS\b', r'\bPROFESSOR\b', r'\bPROF\b', r'\bPROFA\b', r'\bDR\b', 
+        r'\bCOLEGIO ESTADUAL\b', r'\bC E DO CAMPO\b', r'\bC E C\b', r'\bC E\b', r'\bCE\b',
+        r'\bEEB\b', r'\bE E\b', r'\bEM PROFIS\b', r'\bEMPROF\b', r'\bETI\b', r'\bCEEBJA\b',
+        r'\bPROFIS\b', r'\bPROFI\b', r'\bPROFESSOR\b', r'\bPROF\b', r'\bPROFA\b', r'\bDR\b', 
         r'\bDRA\b', r'\bPE\b', r'\bPADRE\b', r'\bDONA\b', r'\bMAIOR\b', 
         r'\bVER\b', r'\bCEL\b', r'\bGEN\b', r'\bGAL\b', r'\bMAL\b', 
         r'\bSEN\b', r'\bDEP\b', r'\bPRES\b', r'\bMONS\b', r'\bCOLEGIO\b', 
@@ -527,6 +527,17 @@ def processar_dados():
                         if m_all:
                             match_found = cad_item
                             break
+                    elif abs(len(w1) - len(w2)) <= 1 and len(w1) > 1 and len(w2) > 1:
+                        # Para casos onde um nome do meio foi abreviado ou expandido (ex: OLAVO FERREIRA DA SILVA vs OLAVO G F DA SILVA)
+                        if w1[0] == w2[0] and w1[-1] == w2[-1]:
+                            match_found = cad_item
+                            break
+
+                    # Similaridade difflib >= 0.80 no mesmo NRE
+                    ratio = SequenceMatcher(None, n_cad, norm_conf).ratio()
+                    if ratio >= 0.80:
+                        match_found = cad_item
+                        break
 
         # Tenta encontrar a cidade real oficial associada a essa escola no catálogo de ativas
         cidade = get_official_city(conf_school, conf_nre, match_found)
