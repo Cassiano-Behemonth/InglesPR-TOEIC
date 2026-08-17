@@ -483,22 +483,16 @@ def processar_dados():
     total_cadastradas = len(list_cad)
     total_both = 0
 
-    # Passada 1: Percorre as escolas confirmadas e cruza com as cadastradas
-    id_counter = 1
-    for conf_row in list_conf:
+    # Passada 1A: Match Exato para TODAS as escolas confirmadas
+    # Garantimos que escolas com correspondência exata tenham prioridade total sobre buscas fuzzy,
+    # evitando que uma escola anterior 'roube' o cadastro de outra via aproximação.
+    matched_conf_map = {}
+
+    for idx, conf_row in enumerate(list_conf):
         conf_school = conf_row.get('ESCOLA', '')
         conf_nre = conf_row.get('NRE', '')
-        conf_students_str = conf_row.get('Total de estudantes que farão o TOIC', '0')
-        
-        # Converte estudantes para int com segurança
-        try:
-            conf_students = int(float(str(conf_students_str).replace(',', '.')))
-        except ValueError:
-            conf_students = 0
-            
         norm_conf = normalize_name(conf_school)
         
-        # Procura correspondência com validação de NRE
         match_found = None
         for cad_item in cadastros_normalizados:
             if not cad_item['matched'] and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
@@ -506,44 +500,71 @@ def processar_dados():
                 if n_cad == norm_conf:
                     match_found = cad_item
                     break
-                
-        # Se não achou por igualdade exata de normalização, tenta busca por inclusão ou abreviação inteligente
-        if not match_found:
-            for cad_item in cadastros_normalizados:
-                if not cad_item['matched'] and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
-                    n_cad = cad_item['norm_name']
-                    if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 12:
+        
+        if match_found:
+            match_found['matched'] = True
+            matched_conf_map[idx] = match_found
+
+    # Passada 1B: Match Aproximado / Fuzzy para escolas confirmadas remanescentes
+    for idx, conf_row in enumerate(list_conf):
+        if idx in matched_conf_map:
+            continue
+
+        conf_school = conf_row.get('ESCOLA', '')
+        conf_nre = conf_row.get('NRE', '')
+        norm_conf = normalize_name(conf_school)
+        
+        match_found = None
+        for cad_item in cadastros_normalizados:
+            if not cad_item['matched'] and (not cad_item['nre'] or nre_matches(cad_item['nre'], conf_nre)):
+                n_cad = cad_item['norm_name']
+                if (n_cad in norm_conf or norm_conf in n_cad) and abs(len(n_cad) - len(norm_conf)) < 12:
+                    match_found = cad_item
+                    break
+                # Checa tolerância a abreviações e preposições (ex: CARLOS DRUMMOND DE ANDRADE vs CARLOS D DE ANDRADE, ANTONIO CASTRO ALVES vs ANTONIO DE CASTRO ALVES)
+                w1 = [w for w in n_cad.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
+                w2 = [w for w in norm_conf.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
+                if len(w1) == len(w2) and len(w1) > 0:
+                    m_all = True
+                    for a, b in zip(w1, w2):
+                        if a != b and not (len(a) == 1 and b.startswith(a)) and not (len(b) == 1 and a.startswith(b)):
+                            m_all = False
+                            break
+                    if m_all:
                         match_found = cad_item
                         break
-                    # Checa tolerância a abreviações e preposições (ex: CARLOS DRUMMOND DE ANDRADE vs CARLOS D DE ANDRADE, ANTONIO CASTRO ALVES vs ANTONIO DE CASTRO ALVES)
-                    w1 = [w for w in n_cad.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
-                    w2 = [w for w in norm_conf.split() if w not in ['DE', 'DA', 'DO', 'DOS', 'DAS']]
-                    if len(w1) == len(w2) and len(w1) > 0:
-                        m_all = True
-                        for a, b in zip(w1, w2):
-                            if a != b and not (len(a) == 1 and b.startswith(a)) and not (len(b) == 1 and a.startswith(b)):
-                                m_all = False
-                                break
-                        if m_all:
-                            match_found = cad_item
-                            break
-                    elif abs(len(w1) - len(w2)) <= 1 and len(w1) > 1 and len(w2) > 1:
-                        # Para casos onde um nome do meio foi abreviado ou expandido (ex: OLAVO FERREIRA DA SILVA vs OLAVO G F DA SILVA)
-                        if w1[0] == w2[0] and w1[-1] == w2[-1]:
-                            match_found = cad_item
-                            break
-
-                    # Similaridade difflib >= 0.80 no mesmo NRE
-                    ratio = SequenceMatcher(None, n_cad, norm_conf).ratio()
-                    if ratio >= 0.80:
+                elif abs(len(w1) - len(w2)) <= 1 and len(w1) > 1 and len(w2) > 1:
+                    # Para casos onde um nome do meio foi abreviado ou expandido (ex: OLAVO FERREIRA DA SILVA vs OLAVO G F DA SILVA)
+                    if w1[0] == w2[0] and w1[-1] == w2[-1]:
                         match_found = cad_item
                         break
 
-        # Tenta encontrar a cidade real oficial associada a essa escola no catálogo de ativas
-        cidade = get_official_city(conf_school, conf_nre, match_found)
+                # Similaridade difflib >= 0.80 no mesmo NRE
+                ratio = SequenceMatcher(None, n_cad, norm_conf).ratio()
+                if ratio >= 0.80:
+                    match_found = cad_item
+                    break
 
         if match_found:
             match_found['matched'] = True
+            matched_conf_map[idx] = match_found
+
+    # Consolida escolas_comparadas
+    id_counter = 1
+    for idx, conf_row in enumerate(list_conf):
+        conf_school = conf_row.get('ESCOLA', '')
+        conf_nre = conf_row.get('NRE', '')
+        conf_students_str = conf_row.get('Total de estudantes que farão o TOIC', '0')
+        
+        try:
+            conf_students = int(float(str(conf_students_str).replace(',', '.')))
+        except ValueError:
+            conf_students = 0
+            
+        match_found = matched_conf_map.get(idx)
+        cidade = get_official_city(conf_school, conf_nre, match_found)
+
+        if match_found:
             total_both += 1
             escolas_comparadas.append({
                 'id': id_counter,
