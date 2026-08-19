@@ -227,7 +227,7 @@
       background: var(--panel);
       border-radius: 8px;
       width: 90%;
-      max-width: 450px;
+      max-width: 480px;
       box-shadow: var(--shadow);
       animation: slideUp 0.2s ease-out;
       border: 1px solid var(--line);
@@ -592,12 +592,21 @@
       let html = '';
       
       // RT
+      let rtHtml = '<i style="color: var(--muted)">Não informado</i>';
+      if (c.rt) {
+        const nome = typeof c.rt === 'object' ? c.rt.nome : c.rt;
+        const email = typeof c.rt === 'object' ? c.rt.email : '';
+        if (nome || email) {
+          rtHtml = `<b>${esc(nome || '')}</b>`;
+          if (email) {
+            rtHtml += `<div style="color: var(--muted); font-size: 12px; margin-top: 2px;">✉️ ${esc(email)}</div>`;
+          }
+        }
+      }
       html += `
         <div class="modal-section">
           <div class="modal-section-title">Responsável pelo Teste (RT)</div>
-          <div class="modal-section-content">
-            ${c.rt ? `<b>${esc(c.rt)}</b>` : '<i style="color: var(--muted)">Não informado</i>'}
-          </div>
+          <div class="modal-section-content">${rtHtml}</div>
         </div>
       `;
       
@@ -606,7 +615,14 @@
       if (c.aplicadores && c.aplicadores.length > 0) {
         aplicadoresHtml = `<div class="modal-badge-list">`;
         c.aplicadores.forEach(ap => {
-          aplicadoresHtml += `<div class="modal-badge-item">${esc(ap)}</div>`;
+          const nome = typeof ap === 'object' ? ap.nome : ap;
+          const email = typeof ap === 'object' ? ap.email : '';
+          aplicadoresHtml += `
+            <div class="modal-badge-item">
+              <div>${esc(nome)}</div>
+              ${email ? `<div style="font-weight: normal; color: var(--muted); font-size: 11.5px; margin-top: 1px;">✉️ ${esc(email)}</div>` : ''}
+            </div>
+          `;
         });
         aplicadoresHtml += `</div>`;
       } else {
@@ -621,12 +637,21 @@
       `;
       
       // Suporte Técnico
+      let supHtml = '<i style="color: var(--muted)">Não informado</i>';
+      if (c.suporte) {
+        const nome = typeof c.suporte === 'object' ? c.suporte.nome : c.suporte;
+        const email = typeof c.suporte === 'object' ? c.suporte.email : '';
+        if (nome || email) {
+          supHtml = `<b>${esc(nome || '')}</b>`;
+          if (email) {
+            supHtml += `<div style="color: var(--muted); font-size: 12px; margin-top: 2px;">✉️ ${esc(email)}</div>`;
+          }
+        }
+      }
       html += `
         <div class="modal-section">
           <div class="modal-section-title">Suporte Técnico & Infraestrutura</div>
-          <div class="modal-section-content">
-            ${c.suporte ? `<b>${esc(c.suporte)}</b>` : '<i style="color: var(--muted)">Não informado</i>'}
-          </div>
+          <div class="modal-section-content">${supHtml}</div>
         </div>
       `;
       
@@ -673,8 +698,6 @@
       });
     };
 
-    
-    
     // Filtros da Tabela (independentes da exportação)
     const searchElem = document.getElementById('search');
     if (searchElem) searchElem.addEventListener('input', renderTable);
@@ -714,29 +737,55 @@
           else if (item.status === 'registered_only') statusTexto = 'Cadastrada (Pendente Oficial)';
 
           const c = item.contacts || {};
+          const rt = c.rt || {};
+          const sup = c.suporte || {};
+          const aps = Array.isArray(c.aplicadores) ? c.aplicadores : [];
+
+          const rtNome = typeof rt === 'object' ? (rt.nome || '') : (rt || '');
+          const rtEmail = typeof rt === 'object' ? (rt.email || '') : '';
+          const supNome = typeof sup === 'object' ? (sup.nome || '') : (sup || '');
+          const supEmail = typeof sup === 'object' ? (sup.email || '') : '';
+
+          const apNomes = aps.map(a => typeof a === 'object' ? a.nome : a).filter(Boolean).join('; ');
+          const apEmails = aps.map(a => typeof a === 'object' ? a.email : '').filter(Boolean).join('; ');
+          const apCompleto = aps.map(a => {
+            if (typeof a === 'object') {
+              let s = a.nome || '';
+              if (a.email) s += ` (${a.email})`;
+              return s;
+            }
+            return a;
+          }).filter(Boolean).join('; ');
+
           return {
             'NRE': item.nre || '',
             'Município': item.cidade_planilha || '',
             'Escola': item.escola || '',
             'Status': statusTexto,
             'Alunos Confirmados': item.alunos || 0,
-            'Responsável Técnico (RT)': c.rt || '',
-            'Suporte Técnico': c.suporte || '',
-            'Aplicadores': Array.isArray(c.aplicadores) ? c.aplicadores.join('; ') : '',
+            'Responsável Técnico (RT)': rtNome,
+            'RT - Email': rtEmail,
+            'Suporte Técnico': supNome,
+            'Suporte Técnico - Email': supEmail,
+            'Aplicadores': apCompleto,
+            'Aplicadores (Apenas E-mails)': apEmails,
             'Observações / Extra': c.extra_aplicadores || ''
           };
         });
 
         const ws = XLSX.utils.json_to_sheet(rows);
         ws['!cols'] = [
-          { wch: 22 },
-          { wch: 22 },
-          { wch: 48 },
-          { wch: 28 },
+          { wch: 18 },
+          { wch: 20 },
+          { wch: 45 },
+          { wch: 25 },
           { wch: 18 },
           { wch: 30 },
+          { wch: 32 },
           { wch: 30 },
-          { wch: 38 },
+          { wch: 32 },
+          { wch: 45 },
+          { wch: 40 },
           { wch: 32 }
         ];
 

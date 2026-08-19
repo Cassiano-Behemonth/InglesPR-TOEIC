@@ -93,53 +93,99 @@ def clean_column_name(col):
     return normalize_name(col).lower()
 
 def extract_contacts(item):
-    rt = ""
-    suporte = ""
-    aplicadores = []
+    # Declarante (quem preencheu)
+    decl_nome = str(item.get('Seu nome completo', '')).strip() if pd.notna(item.get('Seu nome completo', '')) else ''
+    decl_email = str(item.get('Seu email institucional', '')).strip() if pd.notna(item.get('Seu email institucional', '')) else ''
+    decl_cargo = str(item.get('Cargo', '')).strip() if pd.notna(item.get('Cargo', '')) else ''
     
     # RT
-    rt_val = item.get('Nome completo do/a responsável pelo teste (RT)', '')
-    if rt_val and str(rt_val).lower().strip() != 'nan':
-        rt = str(rt_val).strip()
-        
+    rt_nome = str(item.get('Nome completo do/a responsável pelo teste (RT)', '')).strip() if pd.notna(item.get('Nome completo do/a responsável pelo teste (RT)', '')) else ''
+    rt_email = str(item.get('Email institucional do/a responsável pelo teste (RT)', '')).strip() if pd.notna(item.get('Email institucional do/a responsável pelo teste (RT)', '')) else ''
+    rt_cargo = str(item.get('Cargo_1', '')).strip() if pd.notna(item.get('Cargo_1', '')) else ''
+    
     # Suporte
-    sup_val = item.get('Nome completo do/a  responsável de suporte técnico e infraestrutura', '')
-    if not sup_val:
-        # fallback para diferentes espaçamentos
-        for k, v in item.items():
-            k_clean = re.sub(r'\s+', ' ', k).strip().lower()
-            if 'responsavel de suporte tecnico' in k_clean or 'responsavel de suporte tecnico e infraestrutura' in k_clean:
-                sup_val = v
-                break
-    if sup_val and str(sup_val).lower().strip() != 'nan':
-        suporte = str(sup_val).strip()
-        
-    # Aplicadores
-    # Primeiro, verifica se o RT também é aplicador:
-    rt_is_aplicador = item.get('Este RT também exercerá a função de aplicador?', '')
-    if rt_is_aplicador and str(rt_is_aplicador).strip().lower() in ['sim', 's', 'yes']:
-        if rt:
-            aplicadores.append(rt)
-            
-    # Depois, pega os outros aplicadores das colunas específicas
+    sup_nome = ''
+    sup_email = ''
+    sup_cargo = ''
     for k, v in item.items():
         k_clean = re.sub(r'\s+', ' ', k).strip().lower()
-        if k_clean.startswith('nome completo do/a aplicador/a') or k_clean.startswith('nome completo do/a aplicador/a_'):
-            if v and str(v).lower().strip() != 'nan':
-                v_str = str(v).strip()
-                if v_str and v_str not in aplicadores:
-                    aplicadores.append(v_str)
+        if ('nome completo do/a' in k_clean or 'nome do/a' in k_clean) and 'suporte' in k_clean:
+            if pd.notna(v) and str(v).strip().lower() != 'nan':
+                sup_nome = str(v).strip()
+        elif 'email' in k_clean and 'suporte' in k_clean:
+            if pd.notna(v) and str(v).strip().lower() != 'nan':
+                sup_email = str(v).strip()
+        elif k_clean.startswith('cargo_12') or (k.startswith('Cargo') and 'suporte' in k_clean):
+            if pd.notna(v) and str(v).strip().lower() != 'nan':
+                sup_cargo = str(v).strip()
+                
+    if not sup_cargo and 'Cargo_12' in item and pd.notna(item['Cargo_12']):
+        val = str(item['Cargo_12']).strip()
+        if val.lower() != 'nan':
+            sup_cargo = val
+            
+    aplicadores = []
+    
+    # RT como aplicador
+    rt_is_ap = item.get('Este RT também exercerá a função de aplicador?', '')
+    if str(rt_is_ap).strip().lower() in ['sim', 's', 'yes']:
+        if rt_nome and rt_nome.lower() != 'nan':
+            aplicadores.append({
+                'nome': rt_nome,
+                'email': rt_email if rt_email.lower() != 'nan' else '',
+                'cargo': rt_cargo if rt_cargo.lower() != 'nan' else 'RT / Aplicador(a)'
+            })
+            
+    # Itera sobre as colunas para capturar todos os aplicadores cadastrados
+    cols = list(item.keys())
+    for i, col in enumerate(cols):
+        col_clean = re.sub(r'\s+', ' ', col).strip().lower()
+        if ('nome completo do/a aplicador' in col_clean or 'nome completo  do/a aplicador' in col_clean) and 'caso você' not in col_clean:
+            val_name = item.get(col, '')
+            if pd.notna(val_name) and str(val_name).strip() and str(val_name).strip().lower() != 'nan':
+                nome = str(val_name).strip()
+                email = ''
+                cargo = ''
+                for j in range(i+1, min(i+5, len(cols))):
+                    next_col = cols[j]
+                    next_clean = re.sub(r'\s+', ' ', next_col).strip().lower()
+                    if 'email' in next_clean and 'aplicador' in next_clean:
+                        val_email = item.get(next_col, '')
+                        if pd.notna(val_email) and str(val_email).strip().lower() != 'nan':
+                            email = str(val_email).strip()
+                    elif 'cargo' in next_clean:
+                        val_cargo = item.get(next_col, '')
+                        if pd.notna(val_cargo) and str(val_cargo).strip().lower() != 'nan':
+                            cargo = str(val_cargo).strip()
+                if not any(a['nome'].lower() == nome.lower() for a in aplicadores):
+                    aplicadores.append({
+                        'nome': nome,
+                        'email': email,
+                        'cargo': cargo
+                    })
                     
-    # Extra aplicadores
     extra_ap = item.get('Caso você tenha mais algum/a aplicador/a a ser indicado, indique no campo abaixo nome completo, cargo, email institucional e CPF.', '')
-    if extra_ap and str(extra_ap).lower().strip() != 'nan' and str(extra_ap).strip() != '':
-        extra_ap = str(extra_ap).strip()
+    if not pd.notna(extra_ap) or str(extra_ap).lower().strip() == 'nan':
+        extra_ap = ''
     else:
-        extra_ap = ""
+        extra_ap = str(extra_ap).strip()
         
     return {
-        'rt': rt,
-        'suporte': suporte,
+        'declarante': {
+            'nome': decl_nome if decl_nome.lower() != 'nan' else '',
+            'email': decl_email if decl_email.lower() != 'nan' else '',
+            'cargo': decl_cargo if decl_cargo.lower() != 'nan' else ''
+        },
+        'rt': {
+            'nome': rt_nome if rt_nome.lower() != 'nan' else '',
+            'email': rt_email if rt_email.lower() != 'nan' else '',
+            'cargo': rt_cargo if rt_cargo.lower() != 'nan' else ''
+        },
+        'suporte': {
+            'nome': sup_nome if sup_nome.lower() != 'nan' else '',
+            'email': sup_email if sup_email.lower() != 'nan' else '',
+            'cargo': sup_cargo if sup_cargo.lower() != 'nan' else ''
+        },
         'aplicadores': aplicadores,
         'extra_aplicadores': extra_ap
     }
@@ -639,7 +685,8 @@ def processar_dados():
 
 
     # Salva dados na página HTML usando o template
-    criar_template_padrao()
+    if not os.path.exists(TEMPLATE_HTML):
+        criar_template_padrao()
         
     with open(TEMPLATE_HTML, 'r', encoding='utf-8') as f:
         html_content = f.read()
