@@ -45,11 +45,14 @@ jobs:
 
       - name: Prepare site directory
         run: |
-          mkdir dist
+          mkdir -p dist
           cp mapa_toeic_pr.html dist/index.html
           cp mapa_toeic_pr.html dist/mapa_toeic_pr.html
           cp comparativo_toeic.html dist/comparativo_toeic.html
+          cp treinamento_toeic.html dist/treinamento_toeic.html
           cp parana_ibge.json dist/parana_ibge.json
+          cp parana_ibge_clean.geojson dist/parana_ibge_clean.geojson 2>/dev/null || true
+          cp map_city_data.json dist/map_city_data.json 2>/dev/null || true
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
