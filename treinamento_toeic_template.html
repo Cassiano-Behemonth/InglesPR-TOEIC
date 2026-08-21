@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinamento TOEIC Paraná - Acompanhamento de Capacitação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --panel-soft: #f1f5f9;
+      --line: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #059669;
+      --success-soft: rgba(5, 150, 105, 0.12);
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.12);
+      --warning: #d97706;
+      --warning-soft: rgba(217, 119, 6, 0.12);
+      --radius: 12px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-brand::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+    }
+
+    .navbar-menu { display: flex; gap: 8px; }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
+    .nav-link.active { color: var(--accent); background: rgba(37, 99, 235, 0.08); }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px 64px 24px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #cbd5e1;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    /* Grid Stats */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .card-stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.2s;
+    }
+
+    .card-stat:hover { transform: translateY(-2px); }
+
+    .card-stat span {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .card-stat b {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .card-stat.aprovados b { color: var(--success); }
+    .card-stat.reprovados b { color: var(--danger); }
+    .card-stat.pendentes b { color: var(--warning); }
+
+    .card-stat .stat-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 4px;
+    }
+
+    .stat-badge.green { background: var(--success-soft); color: var(--success); }
+    .stat-badge.red { background: var(--danger-soft); color: var(--danger); }
+    .stat-badge.orange { background: var(--warning-soft); color: var(--warning); }
+
+    /* Controls Bar */
+    .controls-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filters-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box:focus {
+      background: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .select-filter {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+      min-width: 170px;
+    }
+
+    .select-filter:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-export {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .btn-export:hover {
+      background: #045c43;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(8, 127, 91, 0.25);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 20px 64px 20px;
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: rgba(241, 245, 249, 0.7); }
+
+    /* Badges */
+    .badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .badge.aprovado {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      font-weight: 800;
+    }
+
+    .badge.reprovado {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      font-weight: 800;
+    }
+
+    .badge.pendente {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .badge.rt {
+      background: rgba(37, 99, 235, 0.12);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .badge.aplicador {
+      background: rgba(14, 165, 233, 0.12);
+      color: #0284c7;
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span>TOEIC Paraná</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
+      <a href="comparativo_toeic.html" class="nav-link">Comparativo Inscrições</a>
+      <a href="treinamento_toeic.html" class="nav-link active">Treinamento TOEIC</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-badge">📊 Acompanhamento de Treinamento 2026</div>
+      <h1>Acompanhamento de Treinamento TOEIC Paraná</h1>
+      <p>Painel de resultados da capacitação dos Responsáveis pelo Teste (RT) e Aplicadores da rede estadual.</p>
+    </header>
+
+    <!-- KPI Stats -->
+    <section class="grid-stats">
+      <div class="card-stat">
+        <span>Total Esperado</span>
+        <b id="statTotalEsperado">3.138</b>
+        <div class="stat-badge green">RTs & Aplicadores</div>
+      </div>
+
+      <div class="card-stat aprovados">
+        <span>Aprovados</span>
+        <b id="statAprovados">0</b>
+        <div id="statTaxaAprov" class="stat-badge green">0% de aprovação</div>
+      </div>
+
+      <div class="card-stat reprovados">
+        <span>Reprovados</span>
+        <b id="statReprovados">0</b>
+        <div class="stat-badge red">Necessitam Refazer</div>
+      </div>
+
+      <div class="card-stat pendentes">
+        <span>Não Realizados / Pendentes</span>
+        <b id="statPendentes">0</b>
+        <div class="stat-badge orange">Aguardando Teste</div>
+      </div>
+
+      <div class="card-stat">
+        <span>Total Avaliados</span>
+        <b id="statAvaliados">0</b>
+        <div class="stat-badge green">Testes Concluídos</div>
+      </div>
+    </section>
+
+    <!-- Filters & Export Controls -->
+    <section class="controls-card">
+      <div class="filters-group">
+        <input type="text" id="search" class="search-box" placeholder="Buscar por Nome, Escola, Município ou E-mail...">
+        
+        <select id="filterNRE" class="select-filter">
+          <option value="all">Todos os NREs</option>
+        </select>
+
+        <select id="filterFuncao" class="select-filter">
+          <option value="all">Todas as Funções</option>
+          <option value="RT">Responsável Técnico (RT)</option>
+          <option value="Aplicador">Aplicador(a)</option>
+        </select>
+
+        <select id="filterStatus" class="select-filter">
+          <option value="all">Todos os Status</option>
+          <option value="Aprovado">Aprovados</option>
+          <option value="Reprovado">Reprovados</option>
+        </select>
+      </div>
+
+      <button id="btnExport" class="btn-export">
+        📊 Baixar Planilha (.xlsx)
+      </button>
+    </section>
+
+    <!-- Table -->
+    <section class="table-card">
+      <div class="table-wrap">
+        <table id="tableTreinamento">
+          <thead>
+            <tr>
+              <th>Data do Teste</th>
+              <th>NRE</th>
+              <th>Município</th>
+              <th>Escola</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Função</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Programa de Língua Inglesa - Secretaria de Estado da Educação do Paraná (SEED-PR)</div>
+      <div style="margin-top: 4px; font-size: 12px; color: var(--muted);">Dados sincronizados da planilha oficial de capacitação TOEIC Paraná</div>
+    </footer>
+  </main>
+
+  <script>
+    /*DATA_TREINAMENTO_STATS_PLACEHOLDER*/
+    /*DATA_TREINAMENTO_LISTA_PLACEHOLDER*/
+
+    // Fallbacks para visualização local caso placeholders não sejam injetados
+    const stats = typeof statsTreinamento !== 'undefined' ? statsTreinamento : {
+      totalEsperado: 3138,
+      totalRealizados: 256,
+      totalAprovados: 245,
+      totalReprovados: 11,
+      totalPendentes: 2882,
+      taxaAprovacao: 95.7
+    };
+
+    const lista = typeof listaTreinamento !== 'undefined' ? listaTreinamento : [];
+
+    const fmt = new Intl.NumberFormat('pt-BR');
+
+    // Preenche KPIs
+    document.getElementById('statTotalEsperado').textContent = fmt.format(stats.totalEsperado);
+    document.getElementById('statAprovados').textContent = fmt.format(stats.totalAprovados);
+    document.getElementById('statReprovados').textContent = fmt.format(stats.totalReprovados);
+    document.getElementById('statPendentes').textContent = fmt.format(stats.totalPendentes);
+    document.getElementById('statAvaliados').textContent = fmt.format(stats.totalRealizados);
+    document.getElementById('statTaxaAprov').textContent = `${stats.taxaAprovacao}% de aprovação`;
+
+    // Popula NREs
+    const nres = [...new Set(lista.map(i => i.nre).filter(Boolean))].sort();
+    const selectNRE = document.getElementById('filterNRE');
+    nres.forEach(nre => {
+      const opt = document.createElement('option');
+      opt.value = nre;
+      opt.textContent = nre.startsWith('NRE') ? nre : `NRE ${nre}`;
+      selectNRE.appendChild(opt);
+    });
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+
+    function norm(s) {
+      return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    }
+
+    function render() {
+      const q = norm(document.getElementById('search').value);
+      const nre = document.getElementById('filterNRE').value;
+      const funcao = document.getElementById('filterFuncao').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const tbody = document.querySelector('#tableTreinamento tbody');
+      tbody.innerHTML = '';
+
+      const filtradas = lista.filter(item => {
+        const matchQ = !q || [item.nome, item.email, item.escola, item.municipio, item.nre].some(f => norm(f).includes(q));
+        const matchNRE = (nre === 'all') || (item.nre === nre);
+        const matchFuncao = (funcao === 'all') || (item.funcao === funcao);
+        const matchStatus = (status === 'all') || (item.status === status);
+        return matchQ && matchNRE && matchFuncao && matchStatus;
+      });
+
+      if (filtradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 32px;">Nenhum participante encontrado com os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      filtradas.forEach(item => {
+        const tr = document.createElement('tr');
+        const isAp = item.status === 'Aprovado';
+        const isRt = item.funcao === 'RT';
+
+        tr.innerHTML = `
+          <td style="white-space: nowrap; font-size: 12.5px; color: var(--muted);">${esc(item.data_teste || '-')}</td>
+          <td><b>${esc(item.nre || '-')}</b></td>
+          <td>${esc(item.municipio || '-')}</td>
+          <td>${esc(item.escola || '-')}</td>
+          <td><b>${esc(item.nome || '-')}</b></td>
+          <td>${item.email ? `<a href="mailto:${esc(item.email)}" style="color: var(--accent); text-decoration: none;">${esc(item.email)}</a>` : '-'}</td>
+          <td><span class="badge ${isRt ? 'rt' : 'aplicador'}">${esc(item.funcao)}</span></td>
+          <td><span class="badge ${isAp ? 'aprovado' : 'reprovado'}">${isAp ? '✓ Aprovado' : '✕ Reprovado'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('filterNRE').addEventListener('change', render);
+    document.getElementById('filterFuncao').addEventListener('change', render);
+    document.getElementById('filterStatus').addEventListener('change', render);
+
+    // Exportação Excel
+    document.getElementById('btnExport').addEventListener('click', function() {
+      if (typeof XLSX === 'undefined') {
+        alert('Carregando gerador de Excel... aguarde um instante.');
+        return;
+      }
+
+      const q = norm(document.getElementById('search').value);
+      const nre = document.getElementById('filterNRE').value;
+      const funcao = document.getElementById('filterFuncao').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const filtradas = lista.filter(item => {
+        const matchQ = !q || [item.nome, item.email, item.escola, item.municipio, item.nre].some(f => norm(f).includes(q));
+        const matchNRE = (nre === 'all') || (item.nre === nre);
+        const matchFuncao = (funcao === 'all') || (item.funcao === funcao);
+        const matchStatus = (status === 'all') || (item.status === status);
+        return matchQ && matchNRE && matchFuncao && matchStatus;
+      });
+
+      if (filtradas.length === 0) {
+        alert('Nenhum registro para exportar.');
+        return;
+      }
+
+      const rows = filtradas.map(item => ({
+        'Data do Teste': item.data_teste || '',
+        'NRE': item.nre || '',
+        'Município': item.municipio || '',
+        'Escola': item.escola || '',
+        'Nome': item.nome || '',
+        'E-mail': item.email || '',
+        'Função': item.funcao || '',
+        'Status do Teste': item.status || ''
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 45 },
+        { wch: 35 },
+        { wch: 35 },
+        { wch: 15 },
+        { wch: 15 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Treinamento TOEIC');
+      XLSX.writeFile(wb, `Treinamento_TOEIC_Parana_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
+
+    render();
+  </script>
+</body>
+</html>

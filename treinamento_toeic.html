@@ -1,0 +1,3203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinamento TOEIC Paraná - Acompanhamento de Capacitação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --panel-soft: #f1f5f9;
+      --line: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #059669;
+      --success-soft: rgba(5, 150, 105, 0.12);
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.12);
+      --warning: #d97706;
+      --warning-soft: rgba(217, 119, 6, 0.12);
+      --radius: 12px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-brand::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+    }
+
+    .navbar-menu { display: flex; gap: 8px; }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
+    .nav-link.active { color: var(--accent); background: rgba(37, 99, 235, 0.08); }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px 64px 24px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #cbd5e1;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    /* Grid Stats */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .card-stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.2s;
+    }
+
+    .card-stat:hover { transform: translateY(-2px); }
+
+    .card-stat span {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .card-stat b {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .card-stat.aprovados b { color: var(--success); }
+    .card-stat.reprovados b { color: var(--danger); }
+    .card-stat.pendentes b { color: var(--warning); }
+
+    .card-stat .stat-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 4px;
+    }
+
+    .stat-badge.green { background: var(--success-soft); color: var(--success); }
+    .stat-badge.red { background: var(--danger-soft); color: var(--danger); }
+    .stat-badge.orange { background: var(--warning-soft); color: var(--warning); }
+
+    /* Controls Bar */
+    .controls-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filters-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box:focus {
+      background: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .select-filter {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+      min-width: 170px;
+    }
+
+    .select-filter:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-export {
+      background: #087f5b;
+      color: #ffffff;
+      border: 1px solid #045c43;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .btn-export:hover {
+      background: #045c43;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(8, 127, 91, 0.25);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 20px 64px 20px;
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: rgba(241, 245, 249, 0.7); }
+
+    /* Badges */
+    .badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .badge.aprovado {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      font-weight: 800;
+    }
+
+    .badge.reprovado {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      font-weight: 800;
+    }
+
+    .badge.pendente {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .badge.rt {
+      background: rgba(37, 99, 235, 0.12);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .badge.aplicador {
+      background: rgba(14, 165, 233, 0.12);
+      color: #0284c7;
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span>TOEIC Paraná</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
+      <a href="comparativo_toeic.html" class="nav-link">Comparativo Inscrições</a>
+      <a href="treinamento_toeic.html" class="nav-link active">Treinamento TOEIC</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-badge">📊 Acompanhamento de Treinamento 2026</div>
+      <h1>Acompanhamento de Treinamento TOEIC Paraná</h1>
+      <p>Painel de resultados da capacitação dos Responsáveis pelo Teste (RT) e Aplicadores da rede estadual.</p>
+    </header>
+
+    <!-- KPI Stats -->
+    <section class="grid-stats">
+      <div class="card-stat">
+        <span>Total Esperado</span>
+        <b id="statTotalEsperado">3.138</b>
+        <div class="stat-badge green">RTs & Aplicadores</div>
+      </div>
+
+      <div class="card-stat aprovados">
+        <span>Aprovados</span>
+        <b id="statAprovados">0</b>
+        <div id="statTaxaAprov" class="stat-badge green">0% de aprovação</div>
+      </div>
+
+      <div class="card-stat reprovados">
+        <span>Reprovados</span>
+        <b id="statReprovados">0</b>
+        <div class="stat-badge red">Necessitam Refazer</div>
+      </div>
+
+      <div class="card-stat pendentes">
+        <span>Não Realizados / Pendentes</span>
+        <b id="statPendentes">0</b>
+        <div class="stat-badge orange">Aguardando Teste</div>
+      </div>
+
+      <div class="card-stat">
+        <span>Total Avaliados</span>
+        <b id="statAvaliados">0</b>
+        <div class="stat-badge green">Testes Concluídos</div>
+      </div>
+    </section>
+
+    <!-- Filters & Export Controls -->
+    <section class="controls-card">
+      <div class="filters-group">
+        <input type="text" id="search" class="search-box" placeholder="Buscar por Nome, Escola, Município ou E-mail...">
+        
+        <select id="filterNRE" class="select-filter">
+          <option value="all">Todos os NREs</option>
+        </select>
+
+        <select id="filterFuncao" class="select-filter">
+          <option value="all">Todas as Funções</option>
+          <option value="RT">Responsável Técnico (RT)</option>
+          <option value="Aplicador">Aplicador(a)</option>
+        </select>
+
+        <select id="filterStatus" class="select-filter">
+          <option value="all">Todos os Status</option>
+          <option value="Aprovado">Aprovados</option>
+          <option value="Reprovado">Reprovados</option>
+        </select>
+      </div>
+
+      <button id="btnExport" class="btn-export">
+        📊 Baixar Planilha (.xlsx)
+      </button>
+    </section>
+
+    <!-- Table -->
+    <section class="table-card">
+      <div class="table-wrap">
+        <table id="tableTreinamento">
+          <thead>
+            <tr>
+              <th>Data do Teste</th>
+              <th>NRE</th>
+              <th>Município</th>
+              <th>Escola</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Função</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Programa de Língua Inglesa - Secretaria de Estado da Educação do Paraná (SEED-PR)</div>
+      <div style="margin-top: 4px; font-size: 12px; color: var(--muted);">Dados sincronizados da planilha oficial de capacitação TOEIC Paraná</div>
+    </footer>
+  </main>
+
+  <script>
+    const statsTreinamento = {
+  "totalEsperado": 3138,
+  "totalRealizados": 256,
+  "totalAprovados": 245,
+  "totalReprovados": 11,
+  "totalPendentes": 2882,
+  "taxaAprovacao": 95.7
+};
+    const listaTreinamento = [
+  {
+    "data_teste": "17/08/2026 20:22:28",
+    "nre": "AREA METROP.SUL",
+    "municipio": "LAPA",
+    "escola": "JUVENAL B DA SILVEIRA, C E C-EF M",
+    "nome": "EDUARDO DA SILVA FORGIARINI",
+    "email": "eduardo.forgiarini@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 08:57:30",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "SEMIRAMIS DE B BRAGA, C E C-M-EF M PROFI",
+    "nome": "RENAN FELIPE BARILLI",
+    "email": "renan.barilli@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 09:32:24",
+    "nre": "LOANDA",
+    "municipio": "SANTA CRUZ DO MONTE CASTELO",
+    "escola": "IVAINA, C E C DE-EF M",
+    "nome": "MARCOS ANTONIO DA SILVA JUNIOR",
+    "email": "jmarcos@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 10:47:59",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "INEZ VICENTE BOROCZ, C E-EF M PROFIS",
+    "nome": "ADRIANA DO ROCIO OLIVEIRA",
+    "email": "oliveira.adriana2@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 10:54:07",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "SEMIRAMIS DE B BRAGA, C E C-M-EF M PROFI",
+    "nome": "ARI LANGRAFE JUNIOR",
+    "email": "ari.junior4@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 10:55:06",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "WILLIE DAVIDS, C E DR-EF M ETI",
+    "nome": "CLAUDIANA JOCIELI SAVINIEC DA SILVA",
+    "email": "silva.claudiana@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 11:01:51",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "FOZ DO IGUACU",
+    "escola": "ALMIRO SARTORI, C E-EF M PROFIS",
+    "nome": "CRISTIAN SCHNEIDER MORAES",
+    "email": "cristian.schneider.moraes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 11:48:13",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "SEGISMUNDO FALARZ, C E C-M-EFMP",
+    "nome": "FRANCIS MARA DALLA CORTE BERTI",
+    "email": "francis.berti@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 12:03:07",
+    "nre": "LOANDA",
+    "municipio": "DIAMANTE DO NORTE",
+    "escola": "REYNALDO MASSI, C E-E F M ETI",
+    "nome": "DEBORA LETICIA MANGANELLI PEREIRA CALDEIRA",
+    "email": "debora.caldeira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 12:07:59",
+    "nre": "PONTA GROSSA",
+    "municipio": "CASTRO",
+    "escola": "JOANA T PEREIRA, C E C-M PROFA - EF M",
+    "nome": "FABIO DE OLIVEIRA E SILVA",
+    "email": "fabio.silva@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 12:16:38",
+    "nre": "PARANAVAI",
+    "municipio": "PARANAVAI",
+    "escola": "ADELIA ROSSI ARNALDI, C E C-EF M",
+    "nome": "GIOVANNA DE LIMA RAMOS",
+    "email": "gigilima204@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 13:07:11",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "RAFAEL IVANHINCHEN",
+    "email": "rafael.ivanhinchen@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 13:07:29",
+    "nre": "MARINGA",
+    "municipio": "MARINGA",
+    "escola": "IPIRANGA, C E C-M-EF M",
+    "nome": "BRUNO CESAR ALONSO",
+    "email": "bruno.alonso@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 13:47:00",
+    "nre": "CAMPO MOURAO",
+    "municipio": "PEABIRU",
+    "escola": "OLAVO BILAC, C E C-M-EF M PROFIS",
+    "nome": "GISLANE FERREIRA",
+    "email": "gislane.ferreira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 13:54:34",
+    "nre": "IRATI",
+    "municipio": "PRUDENTOPOLIS",
+    "escola": "DOMINGOS V LOPES, C E C CAP-EF M",
+    "nome": "LETICIA CHAVES",
+    "email": "leticia.chaves@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 14:24:43",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "ALMIRANTE TAMANDARE",
+    "escola": "JARDIM PARAISO, C E-EF M",
+    "nome": "ANDREIA FERREIRA FRANCO POQUIVIQUI",
+    "email": "andreia.franco@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 14:35:09",
+    "nre": "CAMPO MOURAO",
+    "municipio": "CAMPINA DA LAGOA",
+    "escola": "ALBERTO SANTOS DUMONT, C E-EF M",
+    "nome": "ANDREI FERNANDO SILVA",
+    "email": "silva.andrei@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 14:37:03",
+    "nre": "GUARAPUAVA",
+    "municipio": "RESERVA DO IGUACU",
+    "escola": "ANTONIA A ANTONICHEN, C E DO C-EF M",
+    "nome": "EDIMARA FATIMA DE PAULA",
+    "email": "paula.edimara@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 14:56:33",
+    "nre": "GUARAPUAVA",
+    "municipio": "RESERVA DO IGUACU",
+    "escola": "MICHEL G P A REYDAMS, C E C-M ENG-EF M",
+    "nome": "SUZANA ANTONICHEN FERNANDES",
+    "email": "fernandes.suzana@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 15:08:23",
+    "nre": "PATO BRANCO",
+    "municipio": "CORONEL VIVIDA",
+    "escola": "ARNALDO BUSATO, C E-EF M N PROFIS",
+    "nome": "RODRI BORDIN",
+    "email": "rodrigo.bordin@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 15:29:49",
+    "nre": "GUARAPUAVA",
+    "municipio": "RESERVA DO IGUACU",
+    "escola": "ANTONIA A ANTONICHEN, C E DO C-EF M",
+    "nome": "GISELE ANTONICHEM",
+    "email": "gisele.antonichem@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 16:05:20",
+    "nre": "IRATI",
+    "municipio": "TEIXEIRA SOARES",
+    "escola": "JOAO NEGRAO JR, C E-EF M",
+    "nome": "ANDERSON RODRIGO SCHEFFEL",
+    "email": "anderson.scheffel@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 16:21:52",
+    "nre": "IBAITI",
+    "municipio": "FIGUEIRA",
+    "escola": "LEAO SCHULMANN, C E-EF M",
+    "nome": "ROSANGELA BUENO DE FREITAS PROENCA",
+    "email": "proenca.rosangela@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 16:26:18",
+    "nre": "PITANGA",
+    "municipio": "SANTA MARIA DO OESTE",
+    "escola": "SAO MANOEL, C E C DE-EF M",
+    "nome": "MARCIA FIEBIG DE PAULA DE ALMEIDA",
+    "email": "almeida.marcia4@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 16:37:25",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "SANTOS DUMONT, C E C-M-EF M",
+    "nome": "CLEONICE SABINO",
+    "email": "cleonice.sabino@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "18/08/2026 16:47:09",
+    "nre": "PONTA GROSSA",
+    "municipio": "PONTA GROSSA",
+    "escola": "CENTRO EST EDUC PROFIS DE PONTA GROSSA",
+    "nome": "LUCAS MARTINI SARGENTIM",
+    "email": "lucas.sargentim@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 17:05:51",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "JOSE BUSNARDO, C E C-M - EFM ETI",
+    "nome": "PATRICIA OLIBRATOSKI FERNANDES",
+    "email": "fernandes.patricia@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 19:11:30",
+    "nre": "GOIOERE",
+    "municipio": "UBIRATA",
+    "escola": "OLAVO BILAC, C E C-M-EF M",
+    "nome": "INDIANARA DE OLIVEIRA RODRIGUES DOS SANTOS",
+    "email": "jivolavobilac@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 19:13:16",
+    "nre": "LOANDA",
+    "municipio": "SANTA ISABEL DO IVAI",
+    "escola": "NARCIZO MENDES, C E C-EF M",
+    "nome": "ROSELI APARECIDA DE OLIVEIRA AGOSTINHO",
+    "email": "roseli.oliveira.2@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 20:18:44",
+    "nre": "IVAIPORA",
+    "municipio": "GRANDES RIOS",
+    "escola": "FLORIDA DO IVAI, C E DO C-EF M",
+    "nome": "ODIRLEI CLEVERSON DA SILVA",
+    "email": "odirlei.cleversonda.silva@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 21:02:24",
+    "nre": "TELEMACO BORBA",
+    "municipio": "ORTIGUEIRA",
+    "escola": "PLINIO FRANCO F DA COSTA, C E C-EF M",
+    "nome": "ANDREZA CRISTIANE DE JESUS",
+    "email": "andreza.jesus@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 21:36:28",
+    "nre": "PARANAGUA",
+    "municipio": "MATINHOS",
+    "escola": "MUSTAFA SALOMAO, C E-EF M",
+    "nome": "LETICIA MESSIAS FARAGO",
+    "email": "leticia.farago@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 21:49:09",
+    "nre": "JACAREZINHO",
+    "municipio": "SANTO ANTONIO DA PLATINA",
+    "escola": "MARIA DALILA PINTO, C E-EF M PROFIS",
+    "nome": "DOUGLAS ANTONIO DA SILVA",
+    "email": "sdouglas@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 22:20:14",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "RUI BARBOSA, C E C-EF M_ETI",
+    "nome": "JANICE JACOBUS DE MORAES",
+    "email": "janice.moraes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 22:29:13",
+    "nre": "IVAIPORA",
+    "municipio": "ARIRANHA DO IVAI",
+    "escola": "KENNEDY, C E PRES-EF M",
+    "nome": "ELIANA DANIEL BELETI",
+    "email": "danielbeleti@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 00:12:57",
+    "nre": "AREA METROP.SUL",
+    "municipio": "FAZENDA RIO GRANDE",
+    "escola": "LIRIA MICHELETO NICHELE, C E-EF M",
+    "nome": "LUCILENE COSTA DE BEM",
+    "email": "lucilene.bem@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 08:28:17",
+    "nre": "PONTA GROSSA",
+    "municipio": "PALMEIRA",
+    "escola": "CENTRO EST EDUC PROFIS AG GETULIO VARGAS",
+    "nome": "DAIANE REGINA BANDEIRA KAPP",
+    "email": "daiane.bandeira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 08:42:18",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "SAO CRISTOVAO, C E-EF M PROFIS",
+    "nome": "LUCIANA APARECIDA FIDENCIO",
+    "email": "luciana.fidencio@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 08:46:07",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "FRANCISCO BELTRAO",
+    "escola": "VICENTE DE CARLI, C E C-M PROF-EF M",
+    "nome": "ALINE MALAGI",
+    "email": "aline.malagi@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:20:28",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "CENTRO EST EDUC PROFIS ARLINDO RIBEIRO",
+    "nome": "BELMIRO MARCOS BELONI",
+    "email": "belmiro.beloni@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:25:34",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "BOM JESUS DO SUL",
+    "escola": "BOM JESUS, C E-EF ETI EM",
+    "nome": "ELI BERTO DAMBROS",
+    "email": "eli.dambros@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:30:17",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "RUI BARBOSA, C E-EF M ETI",
+    "nome": "FRANCIELE ROCHA DE MELO",
+    "email": "franciele.melo@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:36:04",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "MARIANGELA RICHART",
+    "email": "mariangela.richart@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:44:11",
+    "nre": "IVAIPORA",
+    "municipio": "SAO PEDRO DO IVAI",
+    "escola": "VICENTE MACHADO, C E C-M-EF M",
+    "nome": "EDNEY BOSSO DE LEON",
+    "email": "edney.leon@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:48:49",
+    "nre": "TOLEDO",
+    "municipio": "TOLEDO",
+    "escola": "CASTELO BRANCO, C E PRES-EM N PROFIS",
+    "nome": "REBECA CRISTINA KERKHOVEN",
+    "email": "rebeca.kerkhoven@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:59:54",
+    "nre": "PARANAGUA",
+    "municipio": "ANTONINA",
+    "escola": "HIRAM ROLIM LAMAS, C E C - EFM ETI",
+    "nome": "JOSE GUSTAVO PONTES",
+    "email": "jose.pontes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 10:38:45",
+    "nre": "LONDRINA",
+    "municipio": "CENTENARIO DO SUL",
+    "escola": "JOSE PIRES, C E PE-EF ETI EM P",
+    "nome": "ALINE DA SILVA PEREIRA SALES",
+    "email": "aline.sales@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:10:01",
+    "nre": "PITANGA",
+    "municipio": "PITANGA",
+    "escola": "RIO DO MEIO, C E C DO-EF M",
+    "nome": "MARIANE CRISTINA FERRAZ GOMES",
+    "email": "mariane.ferraz.gomes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:14:23",
+    "nre": "JACAREZINHO",
+    "municipio": "RIBEIRAO CLARO",
+    "escola": "JOAQUIM A DE MOURA, C E PROF-EF M PROF N",
+    "nome": "MARISTELA FERNANDES FUSETO",
+    "email": "maristela.fuseto@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:27:43",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "MARGARIDA F GONCALVES,CEC PROFA-EFM ETI",
+    "nome": "MICHEL ARAUJO CAPOTE",
+    "email": "michel.capote@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:30:20",
+    "nre": "APUCARANA",
+    "municipio": "APUCARANA",
+    "escola": "POLIVALENTE C D SILVA, C E C-M-EF M P",
+    "nome": "KELI ADRIANE ZANONI SILVEIRA",
+    "email": "keli.zanoni@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:31:10",
+    "nre": "APUCARANA",
+    "municipio": "JANDAIA DO SUL",
+    "escola": "JANDAIA DO SUL, C E C-M-EF M",
+    "nome": "MARCIANA TELLES",
+    "email": "marcianatelles01@gmail.com",
+    "funcao": "RT",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:43:59",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "INEZ VICENTE BOROCZ, C E-EF M PROFIS",
+    "nome": "JORGE LUIZ DOS SANTOS FONTANA",
+    "email": "jorge.fontana@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:49:05",
+    "nre": "TELEMACO BORBA",
+    "municipio": "TELEMACO BORBA",
+    "escola": "SAO PEDRO, C E C-M-EF M",
+    "nome": "JOARI ANTONIO FRANCINE",
+    "email": "joari.francine@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:56:01",
+    "nre": "CORNELIO PROCOPIO",
+    "municipio": "CORNELIO PROCOPIO",
+    "escola": "CRISTO REI, C E-NORMAL PROFIS",
+    "nome": "DANIEL MENDES DE PINHO",
+    "email": "nielp3@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 11:59:30",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "JOYCE MASCHIO DANIEL",
+    "email": "joyce.daniel@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:01:19",
+    "nre": "IBAITI",
+    "municipio": "PINHALAO",
+    "escola": "RODOLFO I PEREIRA, C E C-EF M",
+    "nome": "ARIOSTON TROVAO DE ANDRADE",
+    "email": "arioston.andrade@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:05:47",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "ALMIRANTE TAMANDARE",
+    "escola": "ANGELA SANDRI TEIXEIRA, C E PROF-EF M P",
+    "nome": "VALDENEIA FERREIRA HENEMANN",
+    "email": "valdeneia.henemann@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:11:30",
+    "nre": "PONTA GROSSA",
+    "municipio": "PONTA GROSSA",
+    "escola": "JOSE ELIAS DA ROCHA, C E C-M-EF M PROFIS",
+    "nome": "CRISTIANE MARIA CHAVES VAZ",
+    "email": "vazcristiane@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:50:16",
+    "nre": "PARANAGUA",
+    "municipio": "MATINHOS",
+    "escola": "TEREZA DA S RAMOS, C E PROFA-EF M",
+    "nome": "SONIA MARIA DA CUNHA DIAS",
+    "email": "sonia.dias@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:56:59",
+    "nre": "AREA METROP.SUL",
+    "municipio": "ARAUCARIA",
+    "escola": "GUAJUVIRA, C E C-EF M PROF",
+    "nome": "MARLON MURILO RAMOS FARIA",
+    "email": "marlon.faria@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 13:25:47",
+    "nre": "IBAITI",
+    "municipio": "JAPIRA",
+    "escola": "JOAQUIM P OLIVEIRA, C E CEL-EF M ETI",
+    "nome": "BELINE SANTOS DE FREITAS",
+    "email": "beline.freitas@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:01:43",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "CAETANO MUNHOZ DA ROCHA, C E C-EF M",
+    "nome": "MARIA BEATRIZ LOPES DA SILVA CASTRO",
+    "email": "mcastro@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:06:11",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "WILLIE DAVIDS, C E DR-EF M ETI",
+    "nome": "JAMILA ZAHARA JUNY",
+    "email": "jamila.juny@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:47:24",
+    "nre": "JACAREZINHO",
+    "municipio": "RIBEIRAO DO PINHAL",
+    "escola": "JORGINA B DE PAULA, C E DO C-EF M",
+    "nome": "ELIEGE BERNARDINA SILVERIO DA SILVA",
+    "email": "eliege.silva@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:03:49",
+    "nre": "TOLEDO",
+    "municipio": "PALOTINA",
+    "escola": "DOMINGOS FCO ZARDO, C E-EF M",
+    "nome": "ADEMIR DE CARLI",
+    "email": "ademir.carli@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:07:05",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "RIO BRANCO, C E C-M BAR DO-EF M",
+    "nome": "JARBAS FRANCISCO ALVES",
+    "email": "jarbas.alves@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:09:05",
+    "nre": "ASSIS CHATEAUBRIAND",
+    "municipio": "FORMOSA DO OESTE",
+    "escola": "RUI BARBOSA, C E-EF ETI EM",
+    "nome": "BRUNA CRISTINA TEIXEIRA",
+    "email": "bruna.cristina.teixeira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:15:25",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "WALDE ROSI GALVAO, C E-EF M",
+    "nome": "TATIANE PEREIRA DE SOUZA",
+    "email": "souza.tatiane19@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:36:29",
+    "nre": "IBAITI",
+    "municipio": "CONSELHEIRO MAIRINCK",
+    "escola": "FRANCISCO A ALMEIDA, C E-EM",
+    "nome": "DIOGO GARCIA FERNANDES",
+    "email": "diogo.fernandes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:05:04",
+    "nre": "TELEMACO BORBA",
+    "municipio": "ORTIGUEIRA",
+    "escola": "TANCREDO A NEVES, C E C DR-EF M",
+    "nome": "IVANETE MARQUES LEMES",
+    "email": "ivanete.lemes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:08:31",
+    "nre": "TELEMACO BORBA",
+    "municipio": "SAPOPEMA",
+    "escola": "ANADIR M DA COSTA, C E C PROFA-E F M",
+    "nome": "JOSE AUGUSTO DA SILVA",
+    "email": "jose.silva26@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:11:46",
+    "nre": "APUCARANA",
+    "municipio": "MAUA DA SERRA",
+    "escola": "JOAO PLATH, C E-EF M N PROFIS",
+    "nome": "ERICA APARECIDA NASCIMENTO ALVES",
+    "email": "nerica@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:28:58",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "SAO JOAO, C E C-E F M",
+    "nome": "IRENE MARIA HOLLWEG MARCANTE",
+    "email": "irene.marcante@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:32:41",
+    "nre": "IVAIPORA",
+    "municipio": "IVAIPORA",
+    "escola": "ANTONIO DINIZ PEREIRA, C E C-M-EF M",
+    "nome": "CLEIDE SILVA DE MOURA",
+    "email": "moura.cleide@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 17:31:16",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "SANTOS DUMONT, C E C-M-EF M",
+    "nome": "CLEONICE SABINO",
+    "email": "cleonice.sabino@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 18:41:18",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "ENIRA MORAES RIBEIRO, C E-EF M ETI P",
+    "nome": "JULIANA DE LIMA",
+    "email": "juliana.lima19@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 19:45:10",
+    "nre": "PITANGA",
+    "municipio": "PALMITAL",
+    "escola": "JOAO F NEVES, C E DR-EF M N P",
+    "nome": "ELIZABETE PAZIO",
+    "email": "elizabete.pazio@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 19:49:30",
+    "nre": "AREA METROP.SUL",
+    "municipio": "ARAUCARIA",
+    "escola": "JOAO NERLI DA CRUZ, C E PROF-EF M",
+    "nome": "THIAGO VINICIUS DE ALMEIDA DA SILVA",
+    "email": "thiago.silva20@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 19:59:06",
+    "nre": "LONDRINA",
+    "municipio": "GUARACI",
+    "escola": "CARMELA DUTRA, C E-EF ETI EM",
+    "nome": "JOSIANE COLACITE LOBATO",
+    "email": "josiane.colacite@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 20:20:08",
+    "nre": "IBAITI",
+    "municipio": "JABOTI",
+    "escola": "JULIA WANDERLEY, C E-EF ETI EM PROFIS",
+    "nome": "WANDERLEIA MARIA CURAN",
+    "email": "wanderleia.curan@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 20:38:54",
+    "nre": "TELEMACO BORBA",
+    "municipio": "TELEMACO BORBA",
+    "escola": "SAO FRANCISCO DE ASSIS, C E-E F M ETI P",
+    "nome": "BEATRIZ OLIVEIRA",
+    "email": "beatriz.oliveira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 20:55:37",
+    "nre": "AREA METROP.SUL",
+    "municipio": "PIEN",
+    "escola": "ALFREDO GREIPEL JUNIOR, C E C-E F M P",
+    "nome": "CRISTIANE BENEDITA PERES DOS SANTOS",
+    "email": "cristiane.peres.santos@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:33:04",
+    "nre": "IRATI",
+    "municipio": "PRUDENTOPOLIS",
+    "escola": "CRISTOFORO MYSKIV, C E PE-EF M",
+    "nome": "ALISON MARCEL STOCKI",
+    "email": "alison.stocki@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:34:43",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "JULIO FARAH, C E C-M-EF M",
+    "nome": "ANA PAULA FERNANDES",
+    "email": "afernandes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:49:53",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "ABILIO CARNEIRO, C E-EF M PROFIS",
+    "nome": "DENILSON BOFFO",
+    "email": "denilson.boffo@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 22:05:54",
+    "nre": "PATO BRANCO",
+    "municipio": "CLEVELANDIA",
+    "escola": "CENTRO EST EDUC PROFIS ASSIS BRASIL",
+    "nome": "JULIANA GUIMARAES",
+    "email": "guimaraes.juliana@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 22:10:33",
+    "nre": "PARANAGUA",
+    "municipio": "GUARAQUECABA",
+    "escola": "ILHA DE SUPERAGUI, C E C-EF M",
+    "nome": "WILLIAN CORDEIRO DOS SANTOS",
+    "email": "cordeiro.santos.willian@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 22:47:42",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "NAPOLEAO DA SILVA REIS, C E C-EF M",
+    "nome": "DAFFINY RAFAELA DA CRUZ",
+    "email": "c.daffiny@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:25:23",
+    "nre": "UNIAO DA VITORIA",
+    "municipio": "PAULO FRONTIN",
+    "escola": "PEDRO BUSKO, C E MONS-EF M PROFIS",
+    "nome": "PRICILA CZONSTKA THOMAS",
+    "email": "pricila.thomas@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:26:07",
+    "nre": "LARANJEIRAS DO SUL",
+    "municipio": "QUEDAS DO IGUACU",
+    "escola": "LAGEADO BONITO, C E C-EF M",
+    "nome": "VANESSA BARBARA MERLAK",
+    "email": "vanessa.merlak@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:34:43",
+    "nre": "PONTA GROSSA",
+    "municipio": "PONTA GROSSA",
+    "escola": "BECKER E SILVA, C E C-M PROF-EF M PROFIS",
+    "nome": "IZIS BORCK",
+    "email": "izis.borck@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:13:39",
+    "nre": "CASCAVEL",
+    "municipio": "CAPITAO LEONIDAS MARQUES",
+    "escola": "ALTO A DO IGUACU, C E C -EF ETI EM",
+    "nome": "ADRIANI ANGELA ALVES MENEGOTTO",
+    "email": "adriani.menegoto@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:35:31",
+    "nre": "CAMPO MOURAO",
+    "municipio": "CAMPO MOURAO",
+    "escola": "JAELSON BIACIO, C E C PROF-EF M",
+    "nome": "ROSELI CRISTIANE DE SOUZAKLOSTER",
+    "email": "souza.roseli@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 09:05:32",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "SEMIRAMIS DE B BRAGA, C E C-M-EF M PROFI",
+    "nome": "RENAN FELIPE BARILLI",
+    "email": "renan.barilli@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 11:36:26",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "MORADIAS MONTEIRO LOBATO, CE-EF M P",
+    "nome": "SILENE PEREIRA FERNANDES",
+    "email": "silene.fernandes@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 12:40:13",
+    "nre": "CAMPO MOURAO",
+    "municipio": "PEABIRU",
+    "escola": "OLAVO BILAC, C E C-M-EF M PROFIS",
+    "nome": "VIVIANI PANTE AVANCO",
+    "email": "viviani.avanco@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 12:43:56",
+    "nre": "JACAREZINHO",
+    "municipio": "JACAREZINHO",
+    "escola": "IMACULADA CONCEICAO, C E-EF M ETI",
+    "nome": "ESTELA GATZKE AMBROSIO",
+    "email": "estela.ambrosio@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 14:12:39",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "REASSENTAMENTO SAO FCO, C E C DO-EF M",
+    "nome": "ROSILEI CORREA DA SILVA",
+    "email": "rosicorrea012@gmail.com",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 17:33:01",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "MEDIANEIRA",
+    "escola": "NAIRA FELLINI, C E C-M-EF M PROFIS",
+    "nome": "JOANNA KONDER PINTO LEMOS",
+    "email": "joanna.lemos@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 19:40:11",
+    "nre": "AREA METROP.SUL",
+    "municipio": "CAMPO DO TENENTE",
+    "escola": "VICTOR BUSSMANN, C E-EF M PROFIS",
+    "nome": "VALDIR ALVES PADILHA JUNIOR",
+    "email": "valdir.alvespadilha.junior@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 20:02:32",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "ARLINDO C DE AMORIM, C E C-M-EF M PROFIS",
+    "nome": "DANIELA NUNES AUGUSTO MOSKO",
+    "email": "daniela.mosko@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 20:23:57",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "LUZIA BARBOSA ROMIG",
+    "email": "luzia.romig@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 21:09:04",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "NAPOLEAO DA SILVA REIS, C E C-EF M",
+    "nome": "MARIA DIRCIONE DA SILVA",
+    "email": "dircione@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "18/08/2026 21:45:23",
+    "nre": "PARANAGUA",
+    "municipio": "MATINHOS",
+    "escola": "MUSTAFA SALOMAO, C E-EF M",
+    "nome": "LETICIA MESSIAS FARAGO",
+    "email": "leticia.farago@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 08:30:52",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "FRANCISCO BELTRAO",
+    "escola": "VICENTE DE CARLI, C E C-M PROF-EF M",
+    "nome": "ALINE MALAGI",
+    "email": "aline.malagi@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:35:28",
+    "nre": "APUCARANA",
+    "municipio": "ARAPONGAS",
+    "escola": "ANTONIO RACANELLO SAMPAIO, C E-EF M",
+    "nome": "LUCIOLA CASAGRANDE",
+    "email": "luciola.casagrande@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 09:58:12",
+    "nre": "CASCAVEL",
+    "municipio": "CAMPO BONITO",
+    "escola": "JOSE BONIFACIO, C E-EF M",
+    "nome": "CLAUDETE APARECIDA SIMIONI",
+    "email": "claudete.simioni@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:04:34",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "JOSE BUSNARDO, C E C-M - EFM ETI",
+    "nome": "CAROLINE ALINE ARAUJO BACCIN",
+    "email": "baccin.caroline@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 12:32:14",
+    "nre": "GUARAPUAVA",
+    "municipio": "GOIOXIM",
+    "escola": "PINHALZINHO, C E C DE-EF M",
+    "nome": "ALCIONE FERREIRA RAMOS",
+    "email": "alcione.ramos@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 13:58:41",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SEGISMUNDO A NETTO, C E C-M PROF-EF M N",
+    "nome": "DANIEL MALAQUIAS DO PRADO",
+    "email": "daniel.prado@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:08:09",
+    "nre": "IBAITI",
+    "municipio": "SIQUEIRA CAMPOS",
+    "escola": "JOAQUIM M DE SOUZA, C E C-EF M",
+    "nome": "RONALDO ANTONIO PALINI",
+    "email": "ronaldo.palini@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:17:23",
+    "nre": "GUARAPUAVA",
+    "municipio": "CAMPINA DO SIMAO",
+    "escola": "TEOTONIO VILELA, C E-EF ETI EM",
+    "nome": "ANGELA MARIA PINHEIRO HARDT",
+    "email": "angela.hardt@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 14:48:55",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "JARDIM INTERLAGOS, C E-EF M",
+    "nome": "EDNEIA DAVID DOS SANTOS",
+    "email": "edneia.david.santos@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:12:53",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "FOZ DO IGUACU",
+    "escola": "AYRTON SENNA DA SILVA, C E-EF M N PROFIS",
+    "nome": "JULIANE BORTOLI DALLACORTE",
+    "email": "juliane.bortoli@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:15:02",
+    "nre": "AREA METROP.SUL",
+    "municipio": "SAO JOSE DOS PINHAIS",
+    "escola": "COSTA VIANA, C E-EF M PROFIS N",
+    "nome": "LUCIANA MARCHI MACHADO",
+    "email": "luciana.marchi.machado@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 15:56:56",
+    "nre": "AREA METROP.SUL",
+    "municipio": "LAPA",
+    "escola": "JUSCELINO K DE OLIVEIRA, CEC DR-EF ETI M",
+    "nome": "PATRICIA HORNING",
+    "email": "patricia.horning@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:18:03",
+    "nre": "JACAREZINHO",
+    "municipio": "RIBEIRAO DO PINHAL",
+    "escola": "JORGINA B DE PAULA, C E DO C-EF M",
+    "nome": "BRUNA APARECIDA SIQUEIRA",
+    "email": "bruna.aparecida.siqueira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:18:16",
+    "nre": "DOIS VIZINHOS",
+    "municipio": "SALTO DO LONTRA",
+    "escola": "MARIA MARGARIDA, C E IR-EM N P",
+    "nome": "GABRIEL FELIPE CANCELIER VIEIRA",
+    "email": "gabriel.cancelier.vieira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 16:50:50",
+    "nre": "IBAITI",
+    "municipio": "JABOTI",
+    "escola": "JULIA WANDERLEY, C E-EF ETI EM PROFIS",
+    "nome": "GISELE CARVALHO DE SIQUEIRA",
+    "email": "giselesiqueira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 17:31:10",
+    "nre": "IVAIPORA",
+    "municipio": "IVAIPORA",
+    "escola": "ANTONIO DINIZ PEREIRA, C E C-M-EF M",
+    "nome": "CLEIDE SILVA DE MOURA",
+    "email": "moura.cleide@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 17:33:21",
+    "nre": "TOLEDO",
+    "municipio": "TOLEDO",
+    "escola": "NOVO SARANDI, C E DO CAMPO C-M -EFM",
+    "nome": "CLAUDIA GRACIELI DA SILVA",
+    "email": "claudia.silva26@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 17:39:22",
+    "nre": "IBAITI",
+    "municipio": "FIGUEIRA",
+    "escola": "ALVINA PRESTES, C E PROF-EF M ETI N",
+    "nome": "JESSICA MAYARA RIBEIRO DE LIMA",
+    "email": "jessica.mayara.ribeiro@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 17:42:03",
+    "nre": "IBAITI",
+    "municipio": "JAPIRA",
+    "escola": "JOAQUIM P OLIVEIRA, C E CEL-EF M ETI",
+    "nome": "WILIAN AUGUSTO INES",
+    "email": "wilian.ines@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 19:28:06",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "ANTONIO DE MORAES BARROS, C E-EF M PROFI",
+    "nome": "ALINE DE ABREU CURUNZI",
+    "email": "aline.chanan@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 20:24:22",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "SAO CRISTOVAO, C E-EF M PROFIS",
+    "nome": "ALANA VICENTI",
+    "email": "alana.vicenti@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:05:54",
+    "nre": "AREA METROP.SUL",
+    "municipio": "CAMPO LARGO",
+    "escola": "PEDRO II, C E D-EF M",
+    "nome": "LILIANE DO ROCIO SUONSKI",
+    "email": "liliane.suonski@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:15:02",
+    "nre": "IRATI",
+    "municipio": "PRUDENTOPOLIS",
+    "escola": "CRISTOFORO MYSKIV, C E PE-EF M",
+    "nome": "ALISON MARCEL STOCKI",
+    "email": "alison.stocki@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 21:54:58",
+    "nre": "IVAIPORA",
+    "municipio": "CANDIDO DE ABREU",
+    "escola": "SERGIO KRIGRIVAJA LUCAS, C E I P-EI EF M",
+    "nome": "GABRIELA DA SILVA",
+    "email": "silva.gabriela@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 22:20:31",
+    "nre": "PARANAGUA",
+    "municipio": "GUARAQUECABA",
+    "escola": "ILHA DE SUPERAGUI, C E C-EF M",
+    "nome": "WILLIAN CORDEIRO DOS SANTOS",
+    "email": "cordeiro.santos.willian@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "19/08/2026 23:03:41",
+    "nre": "LOANDA",
+    "municipio": "SANTA MONICA",
+    "escola": "SANTA MONICA, C E-EF M ETI",
+    "nome": "TATIANE GARCIA",
+    "email": "tatiane.garcia11@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 01:21:39",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "ATTICO EUSEBIO DA ROCHA, C E D-EF M PROF",
+    "nome": "EVALDO ROBERTO GODINHO",
+    "email": "evaldorobertogodinho@gmail.com",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 07:38:04",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "PARANA, C E DO-EF M PROFIS",
+    "nome": "NATALLY PALARO DA FONSECA",
+    "email": "natally.fonseca@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 07:45:37",
+    "nre": "LOANDA",
+    "municipio": "NOVA LONDRINA",
+    "escola": "VALE DO TIGRE, C E C-M-EF M",
+    "nome": "SONIA BATISTA GOMIDE",
+    "email": "sonia.gomide@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:18:55",
+    "nre": "AREA METROP.SUL",
+    "municipio": "SAO JOSE DOS PINHAIS",
+    "escola": "LINDAURA R LUCAS, C E PROF-EF M PROFIS",
+    "nome": "SANDRA MOSKO",
+    "email": "sandra.mosko@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:50:16",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "HUMBERTO A CASTELO BRANCO,C E-EF M PROFI",
+    "nome": "KATIA VALERIA DE LIMA",
+    "email": "katia.valeria.lima@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 08:59:12",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "CAETANO MUNHOZ DA ROCHA, C E C-EF M",
+    "nome": "PATRICIA LOPES DA SILVA ROSA",
+    "email": "rosa.patricia@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:15:46",
+    "nre": "IBAITI",
+    "municipio": "CONSELHEIRO MAIRINCK",
+    "escola": "FRANCISCO A ALMEIDA, C E-EM",
+    "nome": "ANA CAROLINA DE PROENCA PITTA",
+    "email": "ana.pitta@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:22:58",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "SEGISMUNDO FALARZ, C E C-M-EFMP",
+    "nome": "MIDIA VALERIO MAIA",
+    "email": "midia.maia@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:38:19",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "TSURU OGUIDO, C E C-M-EF M",
+    "nome": "PAULO FERNANDO MARTINS",
+    "email": "paulo.fernando.martins@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:52:05",
+    "nre": "PONTA GROSSA",
+    "municipio": "IPIRANGA",
+    "escola": "LUIZ DE JESUS CORREIA, C E C - E F M",
+    "nome": "ROSANE PORTELA SVIERCOSKI",
+    "email": "rosane.sviercoski@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:02:21",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "MARMELEIRO",
+    "escola": "TELMO OCTAVIO MULLER, C E-EF ETI N",
+    "nome": "JULIANA NICOLAU FOLLE",
+    "email": "juliana.folle@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:05:19",
+    "nre": "PATO BRANCO",
+    "municipio": "CHOPINZINHO",
+    "escola": "CELY TEREZA GREZZANA, C E C-EF ETI EM",
+    "nome": "CLAUDIA JUCARA GROSSELLI LEMOS",
+    "email": "claudia.grosselli@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:13:44",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "EURIDES BRANDAO, C E-EF M PROFIS",
+    "nome": "TAMYRES MENDES",
+    "email": "terc.tamyresmendes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:32:21",
+    "nre": "AREA METROP.SUL",
+    "municipio": "SAO JOSE DOS PINHAIS",
+    "escola": "JUSCELINO K OLIVEIRA, C E-EF M P",
+    "nome": "JOAO PAULO DA SILVA SOUZA",
+    "email": "joao.souza13@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:06:40",
+    "nre": "IRATI",
+    "municipio": "PRUDENTOPOLIS",
+    "escola": "VILA NOVA, C E-EF ETI EM N",
+    "nome": "LUIZ ROMUALDO KLOSOVSKI",
+    "email": "luiz.klosovski@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:32:30",
+    "nre": "AREA METROP.SUL",
+    "municipio": "QUITANDINHA",
+    "escola": "CAETANO M DA ROCHA, C E DO C DR-EF M",
+    "nome": "GIOVANE ZALESKI",
+    "email": "giovane.zaleski@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:55:50",
+    "nre": "IVAIPORA",
+    "municipio": "ROSARIO DO IVAI",
+    "escola": "BOA V DA STA CRUZ, C E DO C DE-EF M",
+    "nome": "ALEXSANDRO COSMO DAMIAO LUCIANO",
+    "email": "alexsandro.luciano@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 12:44:12",
+    "nre": "LOANDA",
+    "municipio": "DIAMANTE DO NORTE",
+    "escola": "CENTRO EST EDUC PROFIS DO NOROESTE",
+    "nome": "ZORAIDE CAMPANHOLI TAGLIATTI",
+    "email": "zoraide.tagliatti@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:02:38",
+    "nre": "PITANGA",
+    "municipio": "SANTA MARIA DO OESTE",
+    "escola": "ESTRELA DO OESTE, C E C-EF M",
+    "nome": "EVERALDO PEREIRA",
+    "email": "everaldo.pereiras@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:04:54",
+    "nre": "IVAIPORA",
+    "municipio": "JARDIM ALEGRE",
+    "escola": "ANITA GARIBALDI, C E C-M-EF M PROFIS",
+    "nome": "MARISTELLA APPARECIDA SCARAMAL CAETANO SCOLARI",
+    "email": "maristella.caetano@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:15:55",
+    "nre": "AREA METROP.SUL",
+    "municipio": "SAO JOSE DOS PINHAIS",
+    "escola": "EUNICE BORGES DA ROCHA, C E C-EF M",
+    "nome": "EMERSON TADEU DA ROCHA",
+    "email": "emerson.rocha21@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:16:40",
+    "nre": "TELEMACO BORBA",
+    "municipio": "RESERVA",
+    "escola": "TEOFILA NASSAR JANGADA, C E C-EF M",
+    "nome": "SOLANGE APARECIDA DE CARVALHO",
+    "email": "solange.aparecida.carvalho@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:18:22",
+    "nre": "IBAITI",
+    "municipio": "FIGUEIRA",
+    "escola": "ALVINA PRESTES, C E PROF-EF M ETI N",
+    "nome": "MICHELE BENTO MAGALHAES",
+    "email": "magalhaes.michele@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:20:43",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "THAIS EGLER DE PAULA",
+    "email": "thais.paula@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:44:19",
+    "nre": "IBAITI",
+    "municipio": "TOMAZINA",
+    "escola": "CARLOS GOMES, C E-EM ETI",
+    "nome": "RAFAEL DE BARROS",
+    "email": "barros.rafael@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:48:24",
+    "nre": "IBAITI",
+    "municipio": "SIQUEIRA CAMPOS",
+    "escola": "SAGRADA FAMILIA, C E -E F M PROFIS",
+    "nome": "ANA CRISTINA JITIKOSKI",
+    "email": "jitikoski.ana@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:53:17",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "ANTONIO M MELLO, C E-EF ETI EM",
+    "nome": "CINTIA RIBAS SOARES",
+    "email": "cintia.soares@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:03:59",
+    "nre": "PARANAVAI",
+    "municipio": "NOVA ESPERANCA",
+    "escola": "CEEPA IRINEU MENEGUETTE",
+    "nome": "ASSUNTA DONIZETI VARUSSA PEEREIRA",
+    "email": "assunta.pereira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:15:25",
+    "nre": "IBAITI",
+    "municipio": "PINHALAO",
+    "escola": "LEONARDO F NOGUEIRA, C E-E M N",
+    "nome": "FLAVIANA BIANCHINI",
+    "email": "flaviana.ferreira@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:59:38",
+    "nre": "AREA METROP.SUL",
+    "municipio": "BALSA NOVA",
+    "escola": "JUVENTUDE DE SANTO ANTONIO, C E C-M-EF M",
+    "nome": "JAQUELINE KUPKA",
+    "email": "jaqueline.kupka@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:04:19",
+    "nre": "PATO BRANCO",
+    "municipio": "PALMAS",
+    "escola": "EDUARDO, C E C-M MONS-EF M PROFIS",
+    "nome": "JUSCILEI TEREZINHA STEFAN",
+    "email": "juscilei.stefan@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:09:17",
+    "nre": "IBAITI",
+    "municipio": "SIQUEIRA CAMPOS",
+    "escola": "MARIA AP C SALCEDO, C E PR-EF M PROFIS",
+    "nome": "JOSE APARECIDO MOREIRA",
+    "email": "mjose@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:14:12",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "ANTONIO M MELLO, C E-EF ETI EM",
+    "nome": "LUCIANA MOREIRA DE SOUZA",
+    "email": "luciana.souza15@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:20:04",
+    "nre": "TELEMACO BORBA",
+    "municipio": "RESERVA",
+    "escola": "MANOEL A GOMES, C E-EF M PROFIS",
+    "nome": "JULIANA CORA",
+    "email": "juliana.cora@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:33:21",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "RIO BRANCO DO SUL",
+    "escola": "MARIA DA LUZ FURQUIM, C E-EF M N PROFIS",
+    "nome": "FABIOLA BUENO CUPOLLILO",
+    "email": "cupollilo.fabiola@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:38:51",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "CARMELO PERRONE, C E PE-EF M PROFIS",
+    "nome": "LUCIMARA DE FATIMA NEVES RIBEIRO",
+    "email": "lucimara.ribeiro@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:58:09",
+    "nre": "PITANGA",
+    "municipio": "PITANGA",
+    "escola": "VICTOR C DE ALMEIDA, C E C PE-EF M",
+    "nome": "LUCINEIA RODRIGUES",
+    "email": "r.lucineia@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:08:02",
+    "nre": "CASCAVEL",
+    "municipio": "CATANDUVAS",
+    "escola": "REASSENTAMENTO SAO MARCOS, C E C-EF M",
+    "nome": "MARCIA REGINA MENON DA SILVA",
+    "email": "marcia.menon@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:15:31",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "CESAR STANGE, C E-EF M",
+    "nome": "PATRICIA REGINA CIARAMELLO",
+    "email": "patricia.ciaramello@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:15:59",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "FRANCISCO C MARTINS, C E-M P",
+    "nome": "ELENA MARIELE BINI",
+    "email": "elena.bini@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:23:45",
+    "nre": "MARINGA",
+    "municipio": "MARINGA",
+    "escola": "SILVIO M BARROS, C E-EF M",
+    "nome": "RODERLEY JOSE GASPARELLO",
+    "email": "roderley.gasparelo@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:51:27",
+    "nre": "MARINGA",
+    "municipio": "SARANDI",
+    "escola": "CORA CORALINA, C E C-M-EF M PROFIS",
+    "nome": "SARA DOS SANTOS MACIEL",
+    "email": "saracoracoralina@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 17:24:50",
+    "nre": "PARANAGUA",
+    "municipio": "ANTONINA",
+    "escola": "MOYSES LUPION, C E C-M-EF M N PROFIS",
+    "nome": "PATRICIA XAVIER DE CASTRO",
+    "email": "castro.patricia@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 17:25:53",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "LENI MARLENE JACOB, C E C-M PROFA-EF M P",
+    "nome": "SAMUEL AUGUSTO LEOPOLSKI",
+    "email": "samuel.leopolski@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 17:29:49",
+    "nre": "CAMPO MOURAO",
+    "municipio": "CAMPO MOURAO",
+    "escola": "RONDON, C E C-M MAL-EF M PROFIS",
+    "nome": "LUCIANA BARANDAS SANTINONI",
+    "email": "luciana.santinoni@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 17:51:57",
+    "nre": "TELEMACO BORBA",
+    "municipio": "ORTIGUEIRA",
+    "escola": "VISTA ALEGRE, C E C -EI EF M",
+    "nome": "ELAINE CRISTINA ALVES DA SILVA",
+    "email": "elaine.alves.silva21@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 19:16:37",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "NILO BRANDAO, C E PROF-EF M PROFIS",
+    "nome": "JUAREZ SILVEIRA DA ROSA",
+    "email": "juarez.rosa@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 19:25:22",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "FOZ DO IGUACU",
+    "escola": "CASTELO BRANCO, C E C-M PRES-EF M PROFIS",
+    "nome": "JOAO PAULO DE SOUZA MIGLIOLI",
+    "email": "joao.miglioli@educacao.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 20:38:33",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "NADIA SALES KRANZ",
+    "email": "kranz.nadia@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 20:39:07",
+    "nre": "TOLEDO",
+    "municipio": "MARIPA",
+    "escola": "PIO XII, C E-EF M PROFIS",
+    "nome": "ANDREIA PASTORE FRANA",
+    "email": "andreia.pastore@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:01:58",
+    "nre": "PONTA GROSSA",
+    "municipio": "PONTA GROSSA",
+    "escola": "JOAO R V B DU VERNAY,CE PROF-EF M PROFIS",
+    "nome": "KELY CRISTINA DUARTE",
+    "email": "kely.duarte@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:08:30",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "MEDIANEIRA",
+    "escola": "NAIRA FELLINI, C E C-M-EF M PROFIS",
+    "nome": "SUSIANI BACK ALBANO",
+    "email": "susiani.back@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:45:01",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "ALMIRANTE TAMANDARE",
+    "escola": "PEDRO PIEKAS, C E VER-EF M PROFIS",
+    "nome": "ERICA LUANA DE LARA VAZ",
+    "email": "erica.vaz@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:45:04",
+    "nre": "CAMPO MOURAO",
+    "municipio": "ARARUNA",
+    "escola": "ISABEL, C E PRINC-EF M PROFIS",
+    "nome": "AMANDA CRISTINA DA SILVA",
+    "email": "amanda.silva15@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:59:37",
+    "nre": "PARANAGUA",
+    "municipio": "PARANAGUA",
+    "escola": "ALEXANDRA, C E C DE-EF M PROFIS",
+    "nome": "HERMES GOLDENSTEIN JUNIOR",
+    "email": "junior.hermes@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:19:58",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "CENTRO EST EDUC PROFIS SEIJI HATTANDA",
+    "nome": "ELIZABETH SOARES DOS SANTOS KOIKE",
+    "email": "elizabeth.koike@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:28:41",
+    "nre": "CASCAVEL",
+    "municipio": "CASCAVEL",
+    "escola": "JARDIM STA FELICIDADE, C E DE-EF M P",
+    "nome": "RENI DE FATIMA DE SOUZA",
+    "email": "reni.souza@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:30:08",
+    "nre": "PATO BRANCO",
+    "municipio": "PATO BRANCO",
+    "escola": "CRISTO REI, C E-EF M",
+    "nome": "ELAINE LAZAROTO",
+    "email": "elainelazaroto@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:42:12",
+    "nre": "APUCARANA",
+    "municipio": "BOM SUCESSO",
+    "escola": "JOAO PAULO I, C E-EF M PROFIS",
+    "nome": "MARCILEI BONINI PEREZ BONARDI",
+    "email": "marcilei.bonard@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 07:46:17",
+    "nre": "LONDRINA",
+    "municipio": "IBIPORA",
+    "escola": "ULYSSES GUIMARAES, C E C-M-EF M",
+    "nome": "GILMAR ARAUJO DE LIMA",
+    "email": "l.gilmar@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 08:45:52",
+    "nre": "PATO BRANCO",
+    "municipio": "BOM SUCESSO DO SUL",
+    "escola": "CASTELO BRANCO, C E C-EF M ETI",
+    "nome": "ELIZABET ROSA DOS SANTOS",
+    "email": "elizabet.rosa@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 08:48:24",
+    "nre": "AREA METROP.SUL",
+    "municipio": "CAMPO LARGO",
+    "escola": "SAO FRANCISCO DE ASSIS, C E C-EF M",
+    "nome": "FRANCIELE APARECIDA WEINGARTNER",
+    "email": "franciele.weingartner@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 08:54:16",
+    "nre": "CAMPO MOURAO",
+    "municipio": "CAMPO MOURAO",
+    "escola": "OSVALDO CRUZ, C E C-M DR-EF M",
+    "nome": "JULIANA FERREIRA SORROCHE",
+    "email": "juliana.sorroche@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:07:07",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "MARIA HELENA DAVATZ, C E PROFA-EF M",
+    "nome": "CLAUDINEI ALVES DE SOUZA",
+    "email": "sclaudinei@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:34:28",
+    "nre": "APUCARANA",
+    "municipio": "JANDAIA DO SUL",
+    "escola": "RUI BARBOSA, C E-EF M ETI PROFIS",
+    "nome": "LILIAN MARIA RUIZ BORIN",
+    "email": "lilian.borim@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:47:43",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "BIBIANA BITENCOURT, C E-EF M",
+    "nome": "CLEBER BOSSA PIRES",
+    "email": "cleberbossa@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:47:54",
+    "nre": "LONDRINA",
+    "municipio": "LONDRINA",
+    "escola": "JOSE A ARAGAO, C A P DA UEL PROF-EFMP",
+    "nome": "HUMBERTO JOSE CARDOSO PIANCA",
+    "email": "humberto.pianca@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:48:41",
+    "nre": "GUARAPUAVA",
+    "municipio": "PINHAO",
+    "escola": "JULIO MOREIRA, C E C PROF-EF M ETI",
+    "nome": "VANIA CRISTINA DOS SANTOS PIONOSKY",
+    "email": "santos.vania@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:49:07",
+    "nre": "PITANGA",
+    "municipio": "PITANGA",
+    "escola": "AURELIO B DE HOLANDA, C E C - E F M",
+    "nome": "EVAMARA BASNIAK",
+    "email": "evamara.basniak@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:49:37",
+    "nre": "IVAIPORA",
+    "municipio": "GRANDES RIOS",
+    "escola": "FLORIANO PEIXOTO, C E C MAL-EF M",
+    "nome": "ALINE DE FARIA SILVA",
+    "email": "faria.silva.aline@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:57:21",
+    "nre": "APUCARANA",
+    "municipio": "JANDAIA DO SUL",
+    "escola": "JANDAIA DO SUL, C E C-M-EF M",
+    "nome": "MARGARETE DOS SANTOS BARBOSA",
+    "email": "margapde2012@gmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:03:31",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "COLOMBO",
+    "escola": "ABRAHAM LINCOLN, C E PRES-EF M N PROFIS",
+    "nome": "CESAR AUGUSTO SPIES CORDEIRO",
+    "email": "cordeiro.cesar@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:06:06",
+    "nre": "LARANJEIRAS DO SUL",
+    "municipio": "RIO BONITO DO IGUACU",
+    "escola": "LUDOVICA SAFRAIDER, C E-EF M",
+    "nome": "ZENEIDE BELLONI FRANZON",
+    "email": "zeneide.belloni@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:26:37",
+    "nre": "JACAREZINHO",
+    "municipio": "SANTO ANTONIO DA PLATINA",
+    "escola": "MORALINA ELEUTERIO, C E C-M DONA-EF M",
+    "nome": "THAYLA GIOVANA MORAES DA SILVA ALMEIDA",
+    "email": "silva.almeida.thayla@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:30:20",
+    "nre": "APUCARANA",
+    "municipio": "APUCARANA",
+    "escola": "CARLOS MASSARETTO, C E C-M PREF-EF M",
+    "nome": "CACILDA PEREIRA DECHECHI BANNWART",
+    "email": "cacilda.dechechi@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:35:07",
+    "nre": "AREA METROP.NORTE",
+    "municipio": "PINHAIS",
+    "escola": "SPRENGER, C E TEN-EF M N PROFIS",
+    "nome": "ALCEU PEREIRA FILHO",
+    "email": "alceupf@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:44:50",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "PEROLA DO OESTE",
+    "escola": "CASTELO BRANCO, C E C -EF ETI EM",
+    "nome": "KARINE GIONGO FORNAZARI",
+    "email": "karine.fornazari@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:58:23",
+    "nre": "CIANORTE",
+    "municipio": "TAPEJARA",
+    "escola": "SANTANA DE TAPEJARA, C E-EM N PROFIS",
+    "nome": "LUCIMARA FABIANI PIRES",
+    "email": "lucimara.fabiani@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:00:44",
+    "nre": "LARANJEIRAS DO SUL",
+    "municipio": "LARANJEIRAS DO SUL",
+    "escola": "LARANJEIRAS DO SUL, C E DE-EF M",
+    "nome": "VIVIANE SEMIM",
+    "email": "viviane.semim@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:01:55",
+    "nre": "CASCAVEL",
+    "municipio": "CATANDUVAS",
+    "escola": "DILMA K ANGELICO, C E PROFA-EF ETI EM",
+    "nome": "JANETE APARECIDA FORTUNATO LAURINDO",
+    "email": "janete.laurindo@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:06:03",
+    "nre": "MARINGA",
+    "municipio": "PAICANDU",
+    "escola": "JOSE DE ANCHIETA, C E C-EF M",
+    "nome": "BRUNA RODRIGUES DOS SANTOS",
+    "email": "santos.bruna01@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:17:56",
+    "nre": "UMUARAMA",
+    "municipio": "UMUARAMA",
+    "escola": "JOSE BALAN, C E VER-EF ETI EM P",
+    "nome": "MARCIA VALERIA FRANK DE ALMEIDA",
+    "email": "amarcia@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:40:45",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "RUI BARBOSA, C E-EF M ETI",
+    "nome": "MARILZA DA CONCEICAO WEIBER MOREIRA",
+    "email": "marilza.weiber@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:43:33",
+    "nre": "UMUARAMA",
+    "municipio": "ALTONIA",
+    "escola": "MALBA TAHAN, C E-EF ETI EM N P",
+    "nome": "FERNANDA MARIANO ZACARIAS POMBO",
+    "email": "fernandazacarias@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:44:33",
+    "nre": "PARANAVAI",
+    "municipio": "PARANAVAI",
+    "escola": "CURITIBA, C E-EF M ETI",
+    "nome": "SAMARA CAMARGO OLIVEIRA",
+    "email": "camargo.sa@hotmail.com",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 11:52:46",
+    "nre": "APUCARANA",
+    "municipio": "SABAUDIA",
+    "escola": "SABAUDIA, C E-EF M",
+    "nome": "ELIANE APARECIDA DA SILVA ROSA",
+    "email": "eliane.aparecidada.silva@escola.pr.gov.br",
+    "funcao": "RT",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:55:07",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "FRANCISCO ZARDO, C E PROF-EF M PROFIS N",
+    "nome": "DAIANA PAULA MATTEI",
+    "email": "daiana.mattei@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 09:55:27",
+    "nre": "AREA METROP.SUL",
+    "municipio": "SAO JOSE DOS PINHAIS",
+    "escola": "AFONSO PENA, C E-EF M PROFIS",
+    "nome": "VANESSA DA SILVA DE OLIVIERA",
+    "email": "vanessa.dasilvade.oliveira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:12:33",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "MARMELEIRO",
+    "escola": "TELMO OCTAVIO MULLER, C E-EF ETI N",
+    "nome": "JULIANA NICOLAU FOLLE",
+    "email": "juliana.folle@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:23:38",
+    "nre": "APUCARANA",
+    "municipio": "MAUA DA SERRA",
+    "escola": "JOAO PLATH, C E-EF M N PROFIS",
+    "nome": "ANGELICA CARVALHO DE ASSIS MIYANTI",
+    "email": "angelica.miyanti@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:29:04",
+    "nre": "TELEMACO BORBA",
+    "municipio": "CURIUVA",
+    "escola": "JOSE DE ALENCAR, C E C-M-EF M",
+    "nome": "JACKCELY APARECIDA DE LIMA BUENO",
+    "email": "jackcely.bueno@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 10:35:34",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "ARTHUR DE AZEVEDO, C E-EFM ETI N",
+    "nome": "GEANE APARECIDA POTERIKO DA SILVA",
+    "email": "geane.silva@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:10:04",
+    "nre": "AREA METROP.SUL",
+    "municipio": "FAZENDA RIO GRANDE",
+    "escola": "LIRIA MICHELETO NICHELE, C E-EF M",
+    "nome": "VIVIANE APARECIDA DE OLIVEIRA MIRANDA",
+    "email": "viviane.miranda@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:26:11",
+    "nre": "AREA METROP.SUL",
+    "municipio": "BALSA NOVA",
+    "escola": "JUVENTUDE DE SANTO ANTONIO, C E C-M-EF M",
+    "nome": "JHONY ALEX POLETTO",
+    "email": "jhony.poletto@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 11:39:28",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "FOZ DO IGUACU",
+    "escola": "ULYSSES GUIMARAES, C E-EF M PROF",
+    "nome": "SIBELLY KHETRIN GUEDES DE AVILA",
+    "email": "sibelly.avila@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 12:03:20",
+    "nre": "LARANJEIRAS DO SUL",
+    "municipio": "QUEDAS DO IGUACU",
+    "escola": "NUCLEO RESID PINDORAMA, C E DO-EF M",
+    "nome": "RENAN AUGUSTO",
+    "email": "hehenan92@gmail.com",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 12:43:43",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "ALDO DALLAGO, C E-EF M ETI N",
+    "nome": "GISLAINE DA SILVA DE OLIVEIRA",
+    "email": "goliveira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:18:14",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "AUGUSTO VANIN, C E-EF M ETI",
+    "nome": "TANIA REGINA CUOOSS MAGALHAES",
+    "email": "magalhaes.tania@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:46:31",
+    "nre": "CIANORTE",
+    "municipio": "CIDADE GAUCHA",
+    "escola": "COSTA E SILVA, C E MAL-EF M PROF NORMAL",
+    "nome": "AMANDA MARIA NARESSI TRISTAO",
+    "email": "amanda.tristao@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 13:48:43",
+    "nre": "GUARAPUAVA",
+    "municipio": "CANDOI",
+    "escola": "CACHOEIRA, C E C DE-EF M",
+    "nome": "GISELLE BUENO FREITAS",
+    "email": "giselle.freitas@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:07:29",
+    "nre": "CURITIBA",
+    "municipio": "CURITIBA",
+    "escola": "NILO BRANDAO, C E PROF-EF M PROFIS",
+    "nome": "ANGEL MARQUES",
+    "email": "marques.angel@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:31:41",
+    "nre": "IBAITI",
+    "municipio": "TOMAZINA",
+    "escola": "CARLOS GOMES, C E-EM ETI",
+    "nome": "SANDRA DANIEL LOUSANO VERA SANCHEZ  REIS",
+    "email": "sandra.reis@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "20/08/2026 14:47:29",
+    "nre": "AREA METROP.SUL",
+    "municipio": "BALSA NOVA",
+    "escola": "JUVENTUDE DE SANTO ANTONIO, C E C-M-EF M",
+    "nome": "JAQUELINE KUPKA",
+    "email": "jaqueline.kupka@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:27:20",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "CENTRO EST EDUC PROFIS SEIJI HATTANDA",
+    "nome": "NATASHA FERNANDA FERREIRA ROCHA",
+    "email": "natasha.ferreira.rocha@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:38:47",
+    "nre": "LOANDA",
+    "municipio": "MARILENA",
+    "escola": "IZABEL, C E PRINC-EF M",
+    "nome": "ANDERSON",
+    "email": "anderson.gongora@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:39:51",
+    "nre": "IBAITI",
+    "municipio": "SIQUEIRA CAMPOS",
+    "escola": "SAGRADA FAMILIA, C E -E F M PROFIS",
+    "nome": "SILVIA PARMEZANCAMARGO",
+    "email": "camargo.silvia@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 15:49:32",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "ANTONIO M MELLO, C E-EF ETI EM",
+    "nome": "LUCIANA MOREIRA DE SOUZA",
+    "email": "luciana.souza15@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 16:33:21",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "ANA VANDA BASSARA, C E-EF M PROF",
+    "nome": "PAUL HENRIQUE STURMER BLANK",
+    "email": "pauloblank23@gmail.com",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 17:32:53",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "LENI MARLENE JACOB, C E C-M PROFA-EF M P",
+    "nome": "SAMUEL AUGUSTO LEOPOLSKI",
+    "email": "samuel.leopolski@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 18:31:37",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "THIAGO LEONARDO RIBEIRO",
+    "email": "leonardo.ribeiro.thiago@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 18:43:14",
+    "nre": "IBAITI",
+    "municipio": "IBAITI",
+    "escola": "JULIO FARAH, C E C-M-EF M",
+    "nome": "PATRICIA WOHLLERZ DE MELLO",
+    "email": "patricia.wohllerz.mello@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 19:13:31",
+    "nre": "FOZ DO IGUACU",
+    "municipio": "FOZ DO IGUACU",
+    "escola": "CASTELO BRANCO, C E C-M PRES-EF M PROFIS",
+    "nome": "JOAO PAULO DE SOUZA MIGLIOLI",
+    "email": "joao.miglioli@educacao.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 19:45:54",
+    "nre": "AREA METROP.SUL",
+    "municipio": "FAZENDA RIO GRANDE",
+    "escola": "BAYARD OSNA, C E DR-EF M",
+    "nome": "EDERSON",
+    "email": "ederson.gusella.oliveira@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  },
+  {
+    "data_teste": "20/08/2026 20:25:30",
+    "nre": "AREA METROP.SUL",
+    "municipio": "QUITANDINHA",
+    "escola": "CAETANO M DA ROCHA, C E DO C DR-EF M",
+    "nome": "CRISTINA TSCHOKE LEMOS",
+    "email": "cristina.lemos@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:13:16",
+    "nre": "Escola n\u00e3o encontrada",
+    "municipio": "Escola n\u00e3o encontrada",
+    "escola": "SECRETARIA DE ESTADO DA EDUCA\u00c7\u00c3O - SEED CURITIBA/PR",
+    "nome": "NADIA SALES KRANZ",
+    "email": "kranz.nadia@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 21:17:46",
+    "nre": "CASCAVEL",
+    "municipio": "CORBELIA",
+    "escola": "OLAVO BILAC, C E C -EFM",
+    "nome": "SUZANA HERINGER DA SILVA",
+    "email": "suzana.silva13@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:19:34",
+    "nre": "PITANGA",
+    "municipio": "PITANGA",
+    "escola": "ANTONIO DORIGON, C E-EF M PROFIS",
+    "nome": "PATRICIA LOCH RAMALHO",
+    "email": "patricia.loch@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "20/08/2026 22:49:05",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "ENEAS MARQUES",
+    "escola": "CASTRO ALVES, C E-EF M",
+    "nome": "ALINE APARECIDA SOLERA",
+    "email": "aline.solera@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:02:07",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "LIANE MARTA DA COSTA, C E-EF M",
+    "nome": "ELIANE MARTINS PACHECO",
+    "email": "eliane.pacheco@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:23:37",
+    "nre": "AREA METROP.SUL",
+    "municipio": "CAMPO LARGO",
+    "escola": "JOAO XXIII, C E C-M-EF M",
+    "nome": "LUCIMARA DO ROCIO BOARON",
+    "email": "lucimara.boaron@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:27:30",
+    "nre": "IRATI",
+    "municipio": "PRUDENTOPOLIS",
+    "escola": "DOMINGOS V LOPES, C E C CAP-EF M",
+    "nome": "DANIELE PATALO GEREI",
+    "email": "daniele.gerei@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 09:38:45",
+    "nre": "IBAITI",
+    "municipio": "GUAPIRAMA",
+    "escola": "DAVID CARNEIRO, C E-EF M",
+    "nome": "SIMONE APARECIDA DO CARMO RODRIGUES",
+    "email": "simone.carmo@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:22:25",
+    "nre": "GUARAPUAVA",
+    "municipio": "GUARAPUAVA",
+    "escola": "BIBIANA BITENCOURT, C E-EF M",
+    "nome": "CLEBER BOSSA PIRES",
+    "email": "cleberbossa@gmail.com",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:30:12",
+    "nre": "LOANDA",
+    "municipio": "SANTA ISABEL DO IVAI",
+    "escola": "FERNANDO DE AZEVEDO, C E-EF M ETI",
+    "nome": "FERNANDA LIMA FERNANDES COVILO",
+    "email": "fernanda.covilo@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Aprovado"
+  },
+  {
+    "data_teste": "21/08/2026 10:36:59",
+    "nre": "FRANCISCO BELTRAO",
+    "municipio": "AMPERE",
+    "escola": "CECILIA MEIRELES, C E-EF M PROFIS",
+    "nome": "PATRICIA BIASI MARTINI",
+    "email": "patricia.martini@escola.pr.gov.br",
+    "funcao": "Aplicador",
+    "status": "Reprovado"
+  }
+];
+
+    // Fallbacks para visualização local caso placeholders não sejam injetados
+    const stats = typeof statsTreinamento !== 'undefined' ? statsTreinamento : {
+      totalEsperado: 3138,
+      totalRealizados: 256,
+      totalAprovados: 245,
+      totalReprovados: 11,
+      totalPendentes: 2882,
+      taxaAprovacao: 95.7
+    };
+
+    const lista = typeof listaTreinamento !== 'undefined' ? listaTreinamento : [];
+
+    const fmt = new Intl.NumberFormat('pt-BR');
+
+    // Preenche KPIs
+    document.getElementById('statTotalEsperado').textContent = fmt.format(stats.totalEsperado);
+    document.getElementById('statAprovados').textContent = fmt.format(stats.totalAprovados);
+    document.getElementById('statReprovados').textContent = fmt.format(stats.totalReprovados);
+    document.getElementById('statPendentes').textContent = fmt.format(stats.totalPendentes);
+    document.getElementById('statAvaliados').textContent = fmt.format(stats.totalRealizados);
+    document.getElementById('statTaxaAprov').textContent = `${stats.taxaAprovacao}% de aprovação`;
+
+    // Popula NREs
+    const nres = [...new Set(lista.map(i => i.nre).filter(Boolean))].sort();
+    const selectNRE = document.getElementById('filterNRE');
+    nres.forEach(nre => {
+      const opt = document.createElement('option');
+      opt.value = nre;
+      opt.textContent = nre.startsWith('NRE') ? nre : `NRE ${nre}`;
+      selectNRE.appendChild(opt);
+    });
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+
+    function norm(s) {
+      return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    }
+
+    function render() {
+      const q = norm(document.getElementById('search').value);
+      const nre = document.getElementById('filterNRE').value;
+      const funcao = document.getElementById('filterFuncao').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const tbody = document.querySelector('#tableTreinamento tbody');
+      tbody.innerHTML = '';
+
+      const filtradas = lista.filter(item => {
+        const matchQ = !q || [item.nome, item.email, item.escola, item.municipio, item.nre].some(f => norm(f).includes(q));
+        const matchNRE = (nre === 'all') || (item.nre === nre);
+        const matchFuncao = (funcao === 'all') || (item.funcao === funcao);
+        const matchStatus = (status === 'all') || (item.status === status);
+        return matchQ && matchNRE && matchFuncao && matchStatus;
+      });
+
+      if (filtradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 32px;">Nenhum participante encontrado com os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      filtradas.forEach(item => {
+        const tr = document.createElement('tr');
+        const isAp = item.status === 'Aprovado';
+        const isRt = item.funcao === 'RT';
+
+        tr.innerHTML = `
+          <td style="white-space: nowrap; font-size: 12.5px; color: var(--muted);">${esc(item.data_teste || '-')}</td>
+          <td><b>${esc(item.nre || '-')}</b></td>
+          <td>${esc(item.municipio || '-')}</td>
+          <td>${esc(item.escola || '-')}</td>
+          <td><b>${esc(item.nome || '-')}</b></td>
+          <td>${item.email ? `<a href="mailto:${esc(item.email)}" style="color: var(--accent); text-decoration: none;">${esc(item.email)}</a>` : '-'}</td>
+          <td><span class="badge ${isRt ? 'rt' : 'aplicador'}">${esc(item.funcao)}</span></td>
+          <td><span class="badge ${isAp ? 'aprovado' : 'reprovado'}">${isAp ? '✓ Aprovado' : '✕ Reprovado'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('filterNRE').addEventListener('change', render);
+    document.getElementById('filterFuncao').addEventListener('change', render);
+    document.getElementById('filterStatus').addEventListener('change', render);
+
+    // Exportação Excel
+    document.getElementById('btnExport').addEventListener('click', function() {
+      if (typeof XLSX === 'undefined') {
+        alert('Carregando gerador de Excel... aguarde um instante.');
+        return;
+      }
+
+      const q = norm(document.getElementById('search').value);
+      const nre = document.getElementById('filterNRE').value;
+      const funcao = document.getElementById('filterFuncao').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const filtradas = lista.filter(item => {
+        const matchQ = !q || [item.nome, item.email, item.escola, item.municipio, item.nre].some(f => norm(f).includes(q));
+        const matchNRE = (nre === 'all') || (item.nre === nre);
+        const matchFuncao = (funcao === 'all') || (item.funcao === funcao);
+        const matchStatus = (status === 'all') || (item.status === status);
+        return matchQ && matchNRE && matchFuncao && matchStatus;
+      });
+
+      if (filtradas.length === 0) {
+        alert('Nenhum registro para exportar.');
+        return;
+      }
+
+      const rows = filtradas.map(item => ({
+        'Data do Teste': item.data_teste || '',
+        'NRE': item.nre || '',
+        'Município': item.municipio || '',
+        'Escola': item.escola || '',
+        'Nome': item.nome || '',
+        'E-mail': item.email || '',
+        'Função': item.funcao || '',
+        'Status do Teste': item.status || ''
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 45 },
+        { wch: 35 },
+        { wch: 35 },
+        { wch: 15 },
+        { wch: 15 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Treinamento TOEIC');
+      XLSX.writeFile(wb, `Treinamento_TOEIC_Parana_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
+
+    render();
+  </script>
+</body>
+</html>

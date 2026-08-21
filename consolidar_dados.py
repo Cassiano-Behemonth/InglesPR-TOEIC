@@ -21,7 +21,7 @@ except ImportError:
     print("Aviso: gspread ou google-auth não estão instalados. O download automático do Google Sheets não funcionará.")
     gspread = None
 
-# Configurações do Google Sheets
+# Configurações do Google Sheets (Cadastro)
 SPREADSHEET_ID = "13yzhG3Ae3L0-wFh-UQ7QF_3Jfe__Prh7bGhWJDF3lZ8"
 WORKSHEET_GID = "304698461"
 CREDENTIALS_FILE = "credentials.json"
@@ -31,6 +31,11 @@ LOCAL_CADASTRO_CSV = "cadastro_escolas.csv"
 CONFIRMADOS_CSV = "Resultado_TOEIC_Ofício - Página1.csv"
 OUTPUT_HTML = "comparativo_toeic.html"
 TEMPLATE_HTML = "comparativo_toeic_template.html"
+
+# Configurações do Google Sheets (Treinamento)
+SPREADSHEET_TREINAMENTO_ID = "1qc3BXWCJk-Oy38DaCZsfEV8PlK_AbPMu15PZ3-Fv2Gs"
+OUTPUT_TREINAMENTO_HTML = "treinamento_toeic.html"
+TEMPLATE_TREINAMENTO_HTML = "treinamento_toeic_template.html"
 
 def normalize_name(name):
     if not name or not isinstance(name, str):
@@ -466,6 +471,14 @@ def processar_dados():
         df_conf = pd.read_csv(CONFIRMADOS_CSV)
         # Propaga o NRE para linhas subsequentes vazias (ffill)
         df_conf['NRE'] = df_conf['NRE'].ffill()
+        # Filtra linhas de Total Geral ou sem escola válida
+        df_conf = df_conf[
+            df_conf['ESCOLA'].notna() & 
+            (df_conf['ESCOLA'].astype(str).str.strip() != '') & 
+            (df_conf['ESCOLA'].astype(str).str.strip().str.upper() != 'NAN') &
+            (df_conf['ESCOLA'].astype(str).str.strip().str.upper() != 'TOTAL GERAL') &
+            (df_conf['NRE'].astype(str).str.strip().str.upper() != 'TOTAL GERAL')
+        ].copy()
     else:
         # Fallback sem pandas
         df_conf = []
@@ -474,11 +487,13 @@ def processar_dados():
             reader = csv.DictReader(f)
             for row in reader:
                 nre = row.get('NRE', '').strip()
+                escola = row.get('ESCOLA', '').strip()
                 if nre:
                     current_nre = nre
                 else:
                     row['NRE'] = current_nre
-                df_conf.append(row)
+                if escola and escola.upper() != 'TOTAL GERAL' and current_nre.upper() != 'TOTAL GERAL':
+                    df_conf.append(row)
         df_conf = pd.DataFrame(df_conf) if pd else df_conf
 
     # Carrega dados do formulário de cadastro
@@ -751,6 +766,90 @@ def processar_dados():
 
     # Sincroniza em tempo real a página do Mapa com os dados comparativos (cadastrados vs faltam cadastrar)
     atualizar_mapa_comparativo(escolas_comparadas)
+
+    # Processa e consolida os dados de Treinamento da nova planilha
+    processar_treinamento()
+
+def processar_treinamento():
+    if not gspread:
+        print("Aviso: gspread não disponível para processar treinamento.")
+        return
+        
+    print(f"Baixando dados de treinamento da planilha '{SPREADSHEET_TREINAMENTO_ID}'...")
+    try:
+        scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+        creds = obter_credenciais(scopes)
+        if not creds:
+            print("Aviso: Nenhuma credencial encontrada para treinamento.")
+            return
+            
+        client = gspread.authorize(creds)
+        sh = client.open_by_key(SPREADSHEET_TREINAMENTO_ID)
+        
+        wks0 = sh.get_worksheet(0)
+        vals = wks0.get_all_values()
+        
+        kpi_total = 3138
+        header_row_idx = 6
+        for idx, r in enumerate(vals[:15]):
+            if 'Data do teste' in r or 'Status' in r:
+                header_row_idx = idx
+                break
+                
+        headers = vals[header_row_idx]
+        rows = vals[header_row_idx+1:]
+        
+        records = []
+        for r in rows:
+            if not any(str(c).strip() for c in r):
+                continue
+            row_dict = {}
+            for col_idx, col_name in enumerate(headers):
+                if col_name.strip() and col_idx < len(r):
+                    row_dict[col_name.strip()] = r[col_idx].strip()
+                    
+            status_raw = row_dict.get('Status', 'Aprovado').strip()
+            funcao_raw = row_dict.get('Função', 'RT').strip().upper()
+            
+            records.append({
+                'data_teste': row_dict.get('Data do teste', ''),
+                'nre': row_dict.get('NRE', ''),
+                'municipio': row_dict.get('Município', ''),
+                'escola': row_dict.get('Escola', ''),
+                'nome': row_dict.get('Nome', ''),
+                'email': row_dict.get('Email', ''),
+                'funcao': 'RT' if 'RT' in funcao_raw else 'Aplicador',
+                'status': 'Aprovado' if status_raw.lower() == 'aprovado' else 'Reprovado'
+            })
+            
+        total_aprovados = len([x for x in records if x['status'] == 'Aprovado'])
+        total_reprovados = len([x for x in records if x['status'] == 'Reprovado'])
+        total_realizados = len(records)
+        total_pendentes = max(0, kpi_total - total_realizados)
+        taxa = round((total_aprovados / total_realizados * 100), 1) if total_realizados > 0 else 0
+        
+        stats_treinamento = {
+            'totalEsperado': kpi_total,
+            'totalRealizados': total_realizados,
+            'totalAprovados': total_aprovados,
+            'totalReprovados': total_reprovados,
+            'totalPendentes': total_pendentes,
+            'taxaAprovacao': taxa
+        }
+        
+        if os.path.exists(TEMPLATE_TREINAMENTO_HTML):
+            with open(TEMPLATE_TREINAMENTO_HTML, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            content = content.replace('/*DATA_TREINAMENTO_STATS_PLACEHOLDER*/', f'const statsTreinamento = {json.dumps(stats_treinamento, indent=2)};')
+            content = content.replace('/*DATA_TREINAMENTO_LISTA_PLACEHOLDER*/', f'const listaTreinamento = {json.dumps(records, indent=2)};')
+            
+            with open(OUTPUT_TREINAMENTO_HTML, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+            print(f"Página de Treinamento gerada com sucesso: '{OUTPUT_TREINAMENTO_HTML}' ({len(records)} participantes avaliados)!")
+    except Exception as e:
+        print(f"Aviso ao processar planilha de treinamento: {e}")
 
 def atualizar_mapa_comparativo(escolas_comparadas):
     MAP_FILE = 'mapa_toeic_pr.html'
@@ -1205,6 +1304,7 @@ def criar_template_padrao():
     <div class="navbar-menu">
       <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
       <a href="comparativo_toeic.html" class="nav-link active">Comparativo Inscrições</a>
+      <a href="treinamento_toeic.html" class="nav-link">Treinamento TOEIC</a>
     </div>
   </nav>
 

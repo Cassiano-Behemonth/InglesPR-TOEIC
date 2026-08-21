@@ -170,19 +170,19 @@
       text-transform: uppercase;
     }
     .badge.both {
-      background: var(--panel-soft);
-      color: var(--accent-dark);
-      border: 1px solid #c9ded2;
+      background: rgba(5, 150, 105, 0.12);
+      color: #059669;
+      border: 1px solid rgba(5, 150, 105, 0.25);
     }
     .badge.registered_only {
-      background: var(--warning-light);
-      color: var(--warning);
-      border: 1px solid #f9ebda;
+      background: rgba(217, 119, 6, 0.12);
+      color: #d97706;
+      border: 1px solid rgba(217, 119, 6, 0.25);
     }
     .badge.confirmed_only {
-      background: #f1f3f0;
-      color: var(--muted);
-      border: 1px solid var(--line);
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.25);
     }
     
     /* Equipe / Modal / Info Button Styles */
@@ -388,6 +388,7 @@
     <div class="navbar-menu">
       <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
       <a href="comparativo_toeic.html" class="nav-link active">Comparativo Inscrições</a>
+      <a href="treinamento_toeic.html" class="nav-link">Treinamento TOEIC</a>
     </div>
   </nav>
 
@@ -433,9 +434,9 @@
         </select>
         <select id="exportFilterStatus" class="select-filter">
           <option value="all">Todos os Status</option>
-          <option value="both">🟢 Apenas Cadastradas & Confirmadas</option>
-          <option value="confirmed_only">🔴 Apenas Faltam Cadastrar (Sem Cadastro)</option>
-          <option value="registered_only">🟡 Cadastrada, fora da lista oficial</option>
+          <option value="both">🟢 Apenas Aprovados (Confirmadas & Cadastradas)</option>
+          <option value="confirmed_only">🔴 Apenas Não Realizados (Sem Cadastro)</option>
+          <option value="registered_only">🟡 Apenas Aprovados (Pendente Oficial)</option>
         </select>
         <button id="btnDownloadExcel" class="btn-download-excel">
           📥 Baixar Planilha
@@ -448,9 +449,9 @@
         <input type="search" id="search" class="search-input" placeholder="Buscar por escola, município ou NRE...">
         <select id="filterStatus" class="select-filter">
           <option value="all">Todos os Status</option>
-          <option value="both">Confirmado & Cadastrado</option>
-          <option value="registered_only">Cadastrada, fora da lista oficial</option>
-          <option value="confirmed_only">Sem Cadastro</option>
+          <option value="both">Aprovado</option>
+          <option value="confirmed_only">Não Realizado</option>
+          <option value="registered_only">Aprovado (Pendente Oficial)</option>
         </select>
         <select id="filterNRE" class="select-filter">
           <option value="all">Todos os NREs</option>
@@ -492,11 +493,11 @@
 
   <script>
     const statsComparativo = {
-  "totalConfirmadas": 1573,
+  "totalConfirmadas": 1572,
   "totalCadastradas": 1575,
   "ambas": 1570,
   "apenasCadastro": 5,
-  "apenasConfirmacao": 3
+  "apenasConfirmacao": 2
 };
     const listaEscolas = [
   {
@@ -20964,6 +20965,11 @@
           "nome": "Karla Alexandra Rocha Moraes",
           "email": "karla.rocha@escola.pr.gov.br",
           "is_rt": true
+        },
+        {
+          "nome": "Silvana Marlei Baseggio",
+          "email": "silvana.baseggio@escola.pr.gov.br",
+          "is_rt": false
         }
       ],
       "extra_aplicadores": ""
@@ -49324,7 +49330,7 @@
       "aplicadores": [
         {
           "nome": "ROMULO GUILHERME SIQUEIRA DA SILVA",
-          "email": "romulo.siquera.silva@escola.pr.gov.br",
+          "email": "romulo.siqueira.silva@escola.pr.gov.br",
           "is_rt": false
         }
       ],
@@ -55164,15 +55170,6 @@
   },
   {
     "id": 1573,
-    "escola": NaN,
-    "nre": "Total Geral",
-    "cidade_planilha": "Total Geral",
-    "alunos": 30973,
-    "status": "confirmed_only",
-    "contacts": null
-  },
-  {
-    "id": 1574,
     "escola": "JOAO PAULO I, C E PAPA-EFM ETI",
     "nre": "\u00c1rea Metropolitana Norte",
     "cidade_planilha": "BOM SUCESSO",
@@ -55203,7 +55200,7 @@
     }
   },
   {
-    "id": 1575,
+    "id": 1574,
     "escola": "HUMBERTO DE A C BRANCO, E E C-EF",
     "nre": "Apucarana",
     "cidade_planilha": "JANDAIA DO SUL",
@@ -55234,7 +55231,7 @@
     }
   },
   {
-    "id": 1576,
+    "id": 1575,
     "escola": "CENTRO EST EDUC PROFIS AG SALTO DAS ORQU",
     "nre": "Tel\u00eamaco Borba",
     "cidade_planilha": "SAPOPEMA",
@@ -55270,7 +55267,7 @@
     }
   },
   {
-    "id": 1577,
+    "id": 1576,
     "escola": "IRMA A B BIANCHINI, PROFA - EF ETI EM",
     "nre": "\u00c1rea Metropolitana Sul",
     "cidade_planilha": "LAPA",
@@ -55301,7 +55298,7 @@
     }
   },
   {
-    "id": 1578,
+    "id": 1577,
     "escola": "AUGUSTO KAULING, E E DO C-EF",
     "nre": "Ivaipor\u00e2",
     "cidade_planilha": "MANOEL RIBAS",
@@ -55366,9 +55363,9 @@
     populateNreSelect('exportFilterNRE');
 
     const statusLabels = {
-      'both': 'Confirmado & Cadastrado',
-      'registered_only': 'Cadastrada, fora da lista oficial',
-      'confirmed_only': 'Sem Cadastro'
+      'both': '✓ Aprovado',
+      'registered_only': '✓ Aprovado (Pendente Oficial)',
+      'confirmed_only': '✕ Não Realizado'
     };
 
     function esc(value) {

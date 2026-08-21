@@ -170,19 +170,19 @@
       text-transform: uppercase;
     }
     .badge.both {
-      background: var(--panel-soft);
-      color: var(--accent-dark);
-      border: 1px solid #c9ded2;
+      background: rgba(5, 150, 105, 0.12);
+      color: #059669;
+      border: 1px solid rgba(5, 150, 105, 0.25);
     }
     .badge.registered_only {
-      background: var(--warning-light);
-      color: var(--warning);
-      border: 1px solid #f9ebda;
+      background: rgba(217, 119, 6, 0.12);
+      color: #d97706;
+      border: 1px solid rgba(217, 119, 6, 0.25);
     }
     .badge.confirmed_only {
-      background: #f1f3f0;
-      color: var(--muted);
-      border: 1px solid var(--line);
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.25);
     }
     
     /* Equipe / Modal / Info Button Styles */
@@ -388,6 +388,7 @@
     <div class="navbar-menu">
       <a href="mapa_toeic_pr.html" class="nav-link">Mapa de Adesão</a>
       <a href="comparativo_toeic.html" class="nav-link active">Comparativo Inscrições</a>
+      <a href="treinamento_toeic.html" class="nav-link">Treinamento TOEIC</a>
     </div>
   </nav>
 
@@ -433,9 +434,9 @@
         </select>
         <select id="exportFilterStatus" class="select-filter">
           <option value="all">Todos os Status</option>
-          <option value="both">🟢 Apenas Cadastradas & Confirmadas</option>
-          <option value="confirmed_only">🔴 Apenas Faltam Cadastrar (Sem Cadastro)</option>
-          <option value="registered_only">🟡 Cadastrada, fora da lista oficial</option>
+          <option value="both">🟢 Apenas Aprovados (Confirmadas & Cadastradas)</option>
+          <option value="confirmed_only">🔴 Apenas Não Realizados (Sem Cadastro)</option>
+          <option value="registered_only">🟡 Apenas Aprovados (Pendente Oficial)</option>
         </select>
         <button id="btnDownloadExcel" class="btn-download-excel">
           📥 Baixar Planilha
@@ -448,9 +449,9 @@
         <input type="search" id="search" class="search-input" placeholder="Buscar por escola, município ou NRE...">
         <select id="filterStatus" class="select-filter">
           <option value="all">Todos os Status</option>
-          <option value="both">Confirmado & Cadastrado</option>
-          <option value="registered_only">Cadastrada, fora da lista oficial</option>
-          <option value="confirmed_only">Sem Cadastro</option>
+          <option value="both">Aprovado</option>
+          <option value="confirmed_only">Não Realizado</option>
+          <option value="registered_only">Aprovado (Pendente Oficial)</option>
         </select>
         <select id="filterNRE" class="select-filter">
           <option value="all">Todos os NREs</option>
@@ -527,9 +528,9 @@
     populateNreSelect('exportFilterNRE');
 
     const statusLabels = {
-      'both': 'Confirmado & Cadastrado',
-      'registered_only': 'Cadastrada, fora da lista oficial',
-      'confirmed_only': 'Sem Cadastro'
+      'both': '✓ Aprovado',
+      'registered_only': '✓ Aprovado (Pendente Oficial)',
+      'confirmed_only': '✕ Não Realizado'
     };
 
     function esc(value) {
