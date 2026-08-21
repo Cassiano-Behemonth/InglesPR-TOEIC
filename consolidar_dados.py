@@ -92,99 +92,146 @@ def nre_matches(nre1, nre2):
 def clean_column_name(col):
     return normalize_name(col).lower()
 
+def clean_str_val(val):
+    if val is None or (pd and pd.isna(val)):
+        return ''
+    s = str(val).strip()
+    return '' if s.lower() in ['nan', 'none', 'null', ''] else s
+
+def clean_email_val(val):
+    s = clean_str_val(val)
+    if not s:
+        return ''
+    # Remove espaços residuais
+    return re.sub(r'\s+', '', s)
+
+def clean_cpf_val(val):
+    s = clean_str_val(val)
+    if not s:
+        return ''
+    digits = re.sub(r'\D', '', s)
+    if len(digits) == 11:
+        return f"{digits[:3]}.{digits[3:6]}.{digits[6:9]}-{digits[9:]}"
+    return s
+
+def are_persons_identical(p1, p2):
+    em1 = clean_email_val(p1.get('email', '')).lower()
+    em2 = clean_email_val(p2.get('email', '')).lower()
+    if em1 and em2 and '@' in em1 and '@' in em2 and em1 == em2:
+        return True
+        
+    n1 = normalize_name(p1.get('nome', ''))
+    n2 = normalize_name(p2.get('nome', ''))
+    if n1 and n2:
+        if n1 == n2:
+            return True
+        if (len(n1) > 7 and len(n2) > 7) and (n1 in n2 or n2 in n1) and abs(len(n1) - len(n2)) < 8:
+            return True
+        if SequenceMatcher(None, n1, n2).ratio() >= 0.88:
+            return True
+    return False
+
 def extract_contacts(item):
     # Declarante (quem preencheu)
-    decl_nome = str(item.get('Seu nome completo', '')).strip() if pd.notna(item.get('Seu nome completo', '')) else ''
-    decl_email = str(item.get('Seu email institucional', '')).strip() if pd.notna(item.get('Seu email institucional', '')) else ''
-    decl_cargo = str(item.get('Cargo', '')).strip() if pd.notna(item.get('Cargo', '')) else ''
+    decl_nome = clean_str_val(item.get('Seu nome completo', ''))
+    decl_email = clean_email_val(item.get('Seu email institucional', ''))
     
-    # RT
-    rt_nome = str(item.get('Nome completo do/a responsável pelo teste (RT)', '')).strip() if pd.notna(item.get('Nome completo do/a responsável pelo teste (RT)', '')) else ''
-    rt_email = str(item.get('Email institucional do/a responsável pelo teste (RT)', '')).strip() if pd.notna(item.get('Email institucional do/a responsável pelo teste (RT)', '')) else ''
-    rt_cargo = str(item.get('Cargo_1', '')).strip() if pd.notna(item.get('Cargo_1', '')) else ''
+    # Responsável pelo Teste (RT)
+    rt_nome = clean_str_val(item.get('Nome completo do/a responsável pelo teste (RT)', ''))
+    rt_email = clean_email_val(item.get('Email institucional do/a responsável pelo teste (RT)', ''))
     
-    # Suporte
+    rt_is_ap_raw = clean_str_val(item.get('Este RT também exercerá a função de aplicador?', ''))
+    rt_is_ap = rt_is_ap_raw.lower() in ['sim', 's', 'yes', 'true', '1']
+    
+    # Suporte Técnico e Infraestrutura
     sup_nome = ''
     sup_email = ''
-    sup_cargo = ''
     for k, v in item.items():
         k_clean = re.sub(r'\s+', ' ', k).strip().lower()
         if ('nome completo do/a' in k_clean or 'nome do/a' in k_clean) and 'suporte' in k_clean:
-            if pd.notna(v) and str(v).strip().lower() != 'nan':
-                sup_nome = str(v).strip()
+            val = clean_str_val(v)
+            if val: sup_nome = val
         elif 'email' in k_clean and 'suporte' in k_clean:
-            if pd.notna(v) and str(v).strip().lower() != 'nan':
-                sup_email = str(v).strip()
-        elif k_clean.startswith('cargo_12') or (k.startswith('Cargo') and 'suporte' in k_clean):
-            if pd.notna(v) and str(v).strip().lower() != 'nan':
-                sup_cargo = str(v).strip()
-                
-    if not sup_cargo and 'Cargo_12' in item and pd.notna(item['Cargo_12']):
-        val = str(item['Cargo_12']).strip()
-        if val.lower() != 'nan':
-            sup_cargo = val
+            val = clean_email_val(v)
+            if val: sup_email = val
             
     aplicadores = []
     
-    # RT como aplicador
-    rt_is_ap = item.get('Este RT também exercerá a função de aplicador?', '')
-    if str(rt_is_ap).strip().lower() in ['sim', 's', 'yes']:
-        if rt_nome and rt_nome.lower() != 'nan':
-            aplicadores.append({
-                'nome': rt_nome,
-                'email': rt_email if rt_email.lower() != 'nan' else '',
-                'cargo': rt_cargo if rt_cargo.lower() != 'nan' else 'RT / Aplicador(a)'
-            })
+    # Se o RT também exercerá a função de aplicador
+    if rt_is_ap and rt_nome:
+        aplicadores.append({
+            'nome': rt_nome,
+            'email': rt_email,
+            'is_rt': True
+        })
             
-    # Itera sobre as colunas para capturar todos os aplicadores cadastrados
+    # Extrai os blocos de aplicadores cadastrados (suporta até os 10 blocos do Forms)
     cols = list(item.keys())
-    for i, col in enumerate(cols):
-        col_clean = re.sub(r'\s+', ' ', col).strip().lower()
-        if ('nome completo do/a aplicador' in col_clean or 'nome completo  do/a aplicador' in col_clean) and 'caso você' not in col_clean:
-            val_name = item.get(col, '')
-            if pd.notna(val_name) and str(val_name).strip() and str(val_name).strip().lower() != 'nan':
-                nome = str(val_name).strip()
-                email = ''
-                cargo = ''
-                for j in range(i+1, min(i+5, len(cols))):
-                    next_col = cols[j]
-                    next_clean = re.sub(r'\s+', ' ', next_col).strip().lower()
-                    if 'email' in next_clean and 'aplicador' in next_clean:
-                        val_email = item.get(next_col, '')
-                        if pd.notna(val_email) and str(val_email).strip().lower() != 'nan':
-                            email = str(val_email).strip()
-                    elif 'cargo' in next_clean:
-                        val_cargo = item.get(next_col, '')
-                        if pd.notna(val_cargo) and str(val_cargo).strip().lower() != 'nan':
-                            cargo = str(val_cargo).strip()
-                if not any(a['nome'].lower() == nome.lower() for a in aplicadores):
-                    aplicadores.append({
-                        'nome': nome,
-                        'email': email,
-                        'cargo': cargo
-                    })
+    for b_idx in range(10):
+        col_nome = None
+        for col in cols:
+            c_clean = re.sub(r'\s+', ' ', col).strip().lower()
+            if b_idx == 0:
+                if c_clean == 'nome completo do/a aplicador/a':
+                    col_nome = col
+                    break
+            elif b_idx == 1:
+                if c_clean == 'nome completo do/a aplicador/a' and col != 'Nome completo do/a aplicador/a':
+                    col_nome = col
+                    break
+            else:
+                if c_clean == f'nome completo do/a aplicador/a_{b_idx-1}':
+                    col_nome = col
+                    break
                     
-    extra_ap = item.get('Caso você tenha mais algum/a aplicador/a a ser indicado, indique no campo abaixo nome completo, cargo, email institucional e CPF.', '')
-    if not pd.notna(extra_ap) or str(extra_ap).lower().strip() == 'nan':
-        extra_ap = ''
-    else:
-        extra_ap = str(extra_ap).strip()
+        if not col_nome or col_nome not in item:
+            continue
+            
+        val_nome = clean_str_val(item[col_nome])
+        if not val_nome:
+            continue
+            
+        i = cols.index(col_nome)
+        val_email = ''
+        for j in range(i + 1, min(i + 5, len(cols))):
+            next_col = cols[j]
+            nc_clean = re.sub(r'\s+', ' ', next_col).strip().lower()
+            if 'email' in nc_clean and not val_email:
+                val_email = clean_email_val(item[next_col])
+                
+        novo_ap = {
+            'nome': val_nome,
+            'email': val_email,
+            'is_rt': False
+        }
+        
+        # Deduplicação inteligente
+        is_dup = False
+        for existente in aplicadores:
+            if are_persons_identical(existente, novo_ap):
+                is_dup = True
+                if not existente.get('email') and novo_ap['email']:
+                    existente['email'] = novo_ap['email']
+                break
+                
+        if not is_dup:
+            aplicadores.append(novo_ap)
+                    
+    extra_ap = clean_str_val(item.get('Caso você tenha mais algum/a aplicador/a a ser indicado, indique no campo abaixo nome completo, cargo, email institucional e CPF.', ''))
         
     return {
         'declarante': {
-            'nome': decl_nome if decl_nome.lower() != 'nan' else '',
-            'email': decl_email if decl_email.lower() != 'nan' else '',
-            'cargo': decl_cargo if decl_cargo.lower() != 'nan' else ''
+            'nome': decl_nome,
+            'email': decl_email
         },
         'rt': {
-            'nome': rt_nome if rt_nome.lower() != 'nan' else '',
-            'email': rt_email if rt_email.lower() != 'nan' else '',
-            'cargo': rt_cargo if rt_cargo.lower() != 'nan' else ''
+            'nome': rt_nome,
+            'email': rt_email,
+            'exercera_aplicador': 'Sim' if rt_is_ap else 'Não'
         },
         'suporte': {
-            'nome': sup_nome if sup_nome.lower() != 'nan' else '',
-            'email': sup_email if sup_email.lower() != 'nan' else '',
-            'cargo': sup_cargo if sup_cargo.lower() != 'nan' else ''
+            'nome': sup_nome,
+            'email': sup_email
         },
         'aplicadores': aplicadores,
         'extra_aplicadores': extra_ap

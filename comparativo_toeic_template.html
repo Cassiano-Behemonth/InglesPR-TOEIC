@@ -584,68 +584,128 @@
 
     window.showTeam = function(id) {
       const item = listaEscolas.find(e => e.id === id);
-      if (!item || !item.contacts) return;
+      if (!item) return;
       
       document.getElementById('modalSchoolName').textContent = item.escola;
       
-      const c = item.contacts;
+      const c = item.contacts || {};
       let html = '';
       
-      // RT
-      let rtHtml = '<i style="color: var(--muted)">Não informado</i>';
-      if (c.rt) {
-        const nome = typeof c.rt === 'object' ? c.rt.nome : c.rt;
-        const email = typeof c.rt === 'object' ? c.rt.email : '';
-        if (nome || email) {
-          rtHtml = `<b>${esc(nome || '')}</b>`;
-          if (email) {
-            rtHtml += `<div style="color: var(--muted); font-size: 12px; margin-top: 2px;">✉️ ${esc(email)}</div>`;
-          }
-        }
+      // Declarante (se informado)
+      if (c.declarante && (c.declarante.nome || c.declarante.email)) {
+        const d = c.declarante;
+        html += `
+          <div class="modal-section" style="background: rgba(0,0,0,0.02); padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--line); margin-bottom: 14px;">
+            <div style="font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Formulário preenchido por</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink);">${esc(d.nome || 'Não informado')}</div>
+            ${d.email ? `<div style="font-size: 12px; color: var(--muted); margin-top: 2px;">✉️ <a href="mailto:${esc(d.email)}" style="color: inherit; text-decoration: underline;">${esc(d.email)}</a></div>` : ''}
+          </div>
+        `;
       }
+      
+      // RT (Responsável pelo Teste)
+      const rt = c.rt || {};
+      const rtNome = typeof rt === 'object' ? (rt.nome || '') : (rt || '');
+      const rtEmail = typeof rt === 'object' ? (rt.email || '') : '';
+      const rtIsAp = typeof rt === 'object' ? (rt.exercera_aplicador || '') : '';
+      const isRtAprovado = Boolean(rtNome || rtEmail);
+
+      let rtHtml = '';
+      if (isRtAprovado) {
+        rtHtml = `
+          <div style="background: var(--panel-soft); padding: 10px 12px; border-radius: 6px; border-left: 3.5px solid #059669;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <b style="font-size: 14px;">${esc(rtNome || 'Nome não informado')}</b>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge both" style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">✓ Aprovado</span>
+                ${rtIsAp === 'Sim' ? `<span style="font-size: 11px; background: rgba(59, 130, 246, 0.12); color: #2563eb; padding: 2px 8px; border-radius: 12px; font-weight: 600;">Também Aplicador(a)</span>` : ''}
+              </div>
+            </div>
+            ${rtEmail ? `<div style="margin-top: 6px; font-size: 12px; color: var(--muted);">✉️ <a href="mailto:${esc(rtEmail)}" style="color: inherit; text-decoration: underline;">${esc(rtEmail)}</a></div>` : ''}
+          </div>
+        `;
+      } else {
+        rtHtml = `
+          <div style="background: var(--panel-soft); padding: 8px 12px; border-radius: 6px; border-left: 3.5px solid #dc2626; display: flex; align-items: center; justify-content: space-between;">
+            <i style="color: var(--muted);">Não informado</i>
+            <span class="badge confirmed_only" style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">✕ Não Realizado</span>
+          </div>
+        `;
+      }
+
       html += `
         <div class="modal-section">
-          <div class="modal-section-title">Responsável pelo Teste (RT)</div>
+          <div class="modal-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Responsável pelo Teste (RT)</span>
+            <span style="font-size: 11px; font-weight: 600; color: ${isRtAprovado ? '#059669' : '#dc2626'};">${isRtAprovado ? 'Aprovado' : 'Não Realizado'}</span>
+          </div>
           <div class="modal-section-content">${rtHtml}</div>
         </div>
       `;
       
       // Aplicadores
+      const aps = Array.isArray(c.aplicadores) ? c.aplicadores : [];
+      const hasAps = aps.length > 0;
       let aplicadoresHtml = '';
-      if (c.aplicadores && c.aplicadores.length > 0) {
+
+      if (hasAps) {
         aplicadoresHtml = `<div class="modal-badge-list">`;
-        c.aplicadores.forEach(ap => {
-          const nome = typeof ap === 'object' ? ap.nome : ap;
-          const email = typeof ap === 'object' ? ap.email : '';
+        aps.forEach((ap, idx) => {
+          const nome = typeof ap === 'object' ? (ap.nome || '') : ap;
+          const email = typeof ap === 'object' ? (ap.email || '') : '';
+          const isRt = typeof ap === 'object' && ap.is_rt;
+
           aplicadoresHtml += `
-            <div class="modal-badge-item">
-              <div>${esc(nome)}</div>
-              ${email ? `<div style="font-weight: normal; color: var(--muted); font-size: 11.5px; margin-top: 1px;">✉️ ${esc(email)}</div>` : ''}
+            <div class="modal-badge-item" style="border-left-color: #059669; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+                <div style="font-size: 13.5px; font-weight: 600;">
+                  <span style="color: var(--muted); font-size: 11px; margin-right: 4px;">#${idx + 1}</span> ${esc(nome)}
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 10px; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 1px 6px; border-radius: 8px; font-weight: 700;">✓ Aprovado</span>
+                  ${isRt ? `<span style="font-size: 10.5px; background: rgba(59, 130, 246, 0.12); color: #2563eb; padding: 1px 7px; border-radius: 10px; font-weight: 600;">RT da Escola</span>` : ''}
+                </div>
+              </div>
+              ${email ? `<div style="margin-top: 4px; font-size: 12px; color: var(--muted);">✉️ <a href="mailto:${esc(email)}" style="color: inherit; text-decoration: underline;">${esc(email)}</a></div>` : ''}
             </div>
           `;
         });
         aplicadoresHtml += `</div>`;
       } else {
-        aplicadoresHtml = '<i style="color: var(--muted)">Nenhum cadastrado</i>';
+        aplicadoresHtml = `
+          <div style="background: var(--panel-soft); padding: 8px 12px; border-radius: 6px; border-left: 3.5px solid #dc2626; display: flex; align-items: center; justify-content: space-between;">
+            <i style="color: var(--muted)">Nenhum aplicador cadastrado</i>
+            <span class="badge confirmed_only" style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">✕ Não Realizado</span>
+          </div>
+        `;
       }
       
       html += `
         <div class="modal-section">
-          <div class="modal-section-title">Aplicadores</div>
+          <div class="modal-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Aplicadores</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 600; color: ${hasAps ? '#059669' : '#dc2626'};">${hasAps ? `${aps.length} Aprovado(s)` : 'Não Realizado'}</span>
+            </div>
+          </div>
           <div class="modal-section-content">${aplicadoresHtml}</div>
         </div>
       `;
       
-      // Suporte Técnico
+      // Suporte Técnico & Infraestrutura
       let supHtml = '<i style="color: var(--muted)">Não informado</i>';
       if (c.suporte) {
-        const nome = typeof c.suporte === 'object' ? c.suporte.nome : c.suporte;
-        const email = typeof c.suporte === 'object' ? c.suporte.email : '';
+        const sup = c.suporte;
+        const nome = typeof sup === 'object' ? (sup.nome || '') : sup;
+        const email = typeof sup === 'object' ? (sup.email || '') : '';
+        
         if (nome || email) {
-          supHtml = `<b>${esc(nome || '')}</b>`;
-          if (email) {
-            supHtml += `<div style="color: var(--muted); font-size: 12px; margin-top: 2px;">✉️ ${esc(email)}</div>`;
-          }
+          supHtml = `
+            <div style="background: var(--panel-soft); padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+              <b>${esc(nome || 'Nome não informado')}</b>
+              ${email ? `<div style="margin-top: 4px; font-size: 12px; color: var(--muted);">✉️ <a href="mailto:${esc(email)}" style="color: inherit; text-decoration: underline;">${esc(email)}</a></div>` : ''}
+            </div>
+          `;
         }
       }
       html += `
@@ -660,7 +720,7 @@
         html += `
           <div class="modal-section">
             <div class="modal-section-title">Aplicadores Adicionais / Observações</div>
-            <div class="modal-section-content" style="white-space: pre-line; background: var(--panel-soft); padding: 8px; border-radius: 4px; font-size: 12px; max-height: 80px; overflow-y: auto; border: 1px solid var(--line);">
+            <div class="modal-section-content" style="white-space: pre-line; background: var(--panel-soft); padding: 8px 12px; border-radius: 6px; font-size: 12px; max-height: 80px; overflow-y: auto; border: 1px solid var(--line);">
               ${esc(c.extra_aplicadores)}
             </div>
           </div>
@@ -732,22 +792,28 @@
         }
 
         const rows = filtered.map(item => {
-          let statusTexto = 'Falta Cadastrar';
-          if (item.status === 'both') statusTexto = 'Cadastrada & Confirmada';
-          else if (item.status === 'registered_only') statusTexto = 'Cadastrada (Pendente Oficial)';
+          let statusDetalhe = 'Falta Cadastrar';
+          if (item.status === 'both') {
+            statusDetalhe = 'Cadastrada & Confirmada';
+          } else if (item.status === 'registered_only') {
+            statusDetalhe = 'Cadastrada (Pendente Oficial)';
+          }
 
           const c = item.contacts || {};
           const rt = c.rt || {};
           const sup = c.suporte || {};
+          const decl = c.declarante || {};
           const aps = Array.isArray(c.aplicadores) ? c.aplicadores : [];
 
           const rtNome = typeof rt === 'object' ? (rt.nome || '') : (rt || '');
           const rtEmail = typeof rt === 'object' ? (rt.email || '') : '';
-          const supNome = typeof sup === 'object' ? (sup.nome || '') : (sup || '');
-          const supEmail = typeof sup === 'object' ? (sup.email || '') : '';
+          const rtExerceraAp = typeof rt === 'object' ? (rt.exercera_aplicador || '') : '';
+          const rtSituacao = (rtNome || rtEmail) ? 'Aprovado' : 'Não Realizado';
 
+          const apsSituacao = (aps.length > 0) ? 'Aprovado' : 'Não Realizado';
           const apNomes = aps.map(a => typeof a === 'object' ? a.nome : a).filter(Boolean).join('; ');
           const apEmails = aps.map(a => typeof a === 'object' ? a.email : '').filter(Boolean).join('; ');
+          
           const apCompleto = aps.map(a => {
             if (typeof a === 'object') {
               let s = a.nome || '';
@@ -755,21 +821,31 @@
               return s;
             }
             return a;
-          }).filter(Boolean).join('; ');
+          }).filter(Boolean).join(';\n');
+
+          const supNome = typeof sup === 'object' ? (sup.nome || '') : (sup || '');
+          const supEmail = typeof sup === 'object' ? (sup.email || '') : '';
 
           return {
             'NRE': item.nre || '',
             'Município': item.cidade_planilha || '',
             'Escola': item.escola || '',
-            'Status': statusTexto,
+            'Status Escola': statusDetalhe,
             'Alunos Confirmados': item.alunos || 0,
+            'RT - Situação': rtSituacao,
             'Responsável Técnico (RT)': rtNome,
             'RT - Email': rtEmail,
+            'RT - Também é Aplicador?': rtExerceraAp,
+            'Aplicadores - Situação': apsSituacao,
+            'Total de Aplicadores': aps.length,
+            'Aplicadores (Nomes e E-mails)': apCompleto,
+            'Aplicadores (Apenas Nomes)': apNomes,
+            'Aplicadores (Apenas E-mails)': apEmails,
+            'Observações / Aplicadores Extras': c.extra_aplicadores || '',
             'Suporte Técnico': supNome,
             'Suporte Técnico - Email': supEmail,
-            'Aplicadores': apCompleto,
-            'Aplicadores (Apenas E-mails)': apEmails,
-            'Observações / Extra': c.extra_aplicadores || ''
+            'Declarante (Preenchimento)': decl.nome || '',
+            'Declarante - Email': decl.email || ''
           };
         });
 
